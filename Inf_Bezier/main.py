@@ -44,7 +44,7 @@ class point:
         pygame.draw.circle(screen, c_floor_sdw, (self.x, self.y + floorHeight), self.pointWidth)
 
 
-class curve:
+class curve2:
     def __init__(self, x, y, lineWidth):
         curves.append(self)
 
@@ -68,24 +68,77 @@ class curve:
 
         self.deleted = False
 
-    def draw(self):
-        #draw circle shadows
-        self.anchor1.draw_sdw()
-        self.end1.draw_sdw()
-        self.end2.draw_sdw()
+        #self.curveAccuracy = 10
+        #self.bezierPointsX = []
+        #self.bezierPointsY = []
+        #initialize bezier points as 2 arrays of each coordinate instead of new point object
 
+    def drawSupport(self):
+        #draw connection lines
+        pygame.draw.line(screen, c_line, (self.end1.x, self.end1.y), (self.anchor1.x, self.anchor1.y), self.lineWidth)
+        pygame.draw.line(screen, c_line, (self.anchor1.x, self.anchor1.y), (self.end2.x, self.end2.y), self.lineWidth)
+    
+    def drawSupport_sdw(self):
         #draw connection lines floor shadow
         pygame.draw.line(screen, c_floor_sdw, (self.end1.x, self.end1.y + floorHeight), (self.anchor1.x, self.anchor1.y + floorHeight), self.lineWidth)
         pygame.draw.line(screen, c_floor_sdw, (self.anchor1.x, self.anchor1.y + floorHeight), (self.end2.x, self.end2.y + floorHeight), self.lineWidth)
 
+    #def getBezierPoint2(t)
+
+    #def drawCurve
+
+    #def drawCurve_sdw
+
+class curve3:
+    def __init__(self, x, y, lineWidth):
+        curves.append(self)
+
+        self.x = x
+        self.y = y
+
+        self.lineWidth = lineWidth
+
+        self.points = []
+        self.end1 = point(self.x - 50, self.y + 50, end_width, c_end, c_end_sdw)
+        self.points.append(self.end1)
+        self.end1.parentCurve = self
+
+        self.anchor1 = point(self.x - 17, self.y + 17, anchor_width, c_anchor, c_anchor_sdw)
+        self.points.append(self.anchor1)
+        self.anchor1.parentCurve = self
+
+        self.anchor2 = point(self.x + 17, self.y - 17, anchor_width, c_anchor, c_anchor_sdw)
+        self.points.append(self.anchor2)
+        self.anchor2.parentCurve = self
+
+        self.end2 = point(self.x + 50, self.y - 50, end_width, c_end, c_end_sdw)
+        self.points.append(self.end2)
+        self.end2.parentCurve = self
+
+        self.deleted = False
+
+        #self.curveAccuracy = 10
+        #self.bezierPointsX = []
+        #self.bezierPointsY = []
+        #initialize bezier points as 2 arrays of each coordinate instead of new point object
+
+    def drawSupport(self):
         #draw connection lines
         pygame.draw.line(screen, c_line, (self.end1.x, self.end1.y), (self.anchor1.x, self.anchor1.y), self.lineWidth)
-        pygame.draw.line(screen, c_line, (self.anchor1.x, self.anchor1.y), (self.end2.x, self.end2.y), self.lineWidth)
+        pygame.draw.line(screen, c_line, (self.anchor1.x, self.anchor1.y), (self.anchor2.x, self.anchor2.y), self.lineWidth)
+        pygame.draw.line(screen, c_line, (self.anchor2.x, self.anchor2.y), (self.end2.x, self.end2.y), self.lineWidth)
+    
+    def drawSupport_sdw(self):
+        #draw connection lines floor shadow
+        pygame.draw.line(screen, c_floor_sdw, (self.end1.x, self.end1.y + floorHeight), (self.anchor1.x, self.anchor1.y + floorHeight), self.lineWidth)
+        pygame.draw.line(screen, c_floor_sdw, (self.anchor1.x, self.anchor1.y + floorHeight), (self.anchor2.x, self.anchor2.y + floorHeight), self.lineWidth)
+        pygame.draw.line(screen, c_floor_sdw, (self.anchor2.x, self.anchor2.y + floorHeight), (self.end2.x, self.end2.y + floorHeight), self.lineWidth)
 
-        #draw circles
-        self.anchor1.draw()
-        self.end1.draw()
-        self.end2.draw()
+    #def getBezierPoint3(t)
+
+    #def drawCurve
+
+    #def drawCurve_sdw
 #-------------------------------------------------------------------------------------------------------------
 
 class mousePointMover:
@@ -194,7 +247,7 @@ anchor_width = 6
 floorHeight = 30
 curves = []
 
-curve1 = curve(screenWidth/2, screenHeight/2, 2)
+curv2 = curve2(screenWidth/2, screenHeight/2, 2)
 
 def addCurve(power):
     #add quadratic curve at mouse pos
@@ -203,7 +256,10 @@ def addCurve(power):
     mY = mPos[1]
 
     if power == 2:
-        curve2 = curve(mX, mY, 2)
+        curve = curve2(mX, mY, 2)
+
+    if power == 3:
+        curve = curve3(mX, mY, 2)
 
 deleteDistance = 50
 def deleteCurve():
@@ -259,6 +315,9 @@ while True:
             if keys[pygame.K_2]:
                 #add quadratic curve
                 addCurve(2)
+            if keys[pygame.K_3]:
+                #add qubic curve
+                addCurve(3)
 
             #deleting curves
             if keys[pygame.K_x]:
@@ -299,19 +358,33 @@ while True:
     if hand.isHolding == True:
         hand.movePoint()
 
-    #udpate all curves
-    for i in range(len(curves)):
-        curves[i].draw()
+    #draw all shadows
+    for curv in curves:
+        #draw every curvs shadow
+        curv.drawSupport_sdw()
+
+        for pont in curv.points:
+            #draw every points shadow
+            pont.draw_sdw()
+
+    #draw all tops
+    for curve in curves:
+        #draw every curvs shadow
+        curve.drawSupport()
+
+        for pont in curve.points:
+            #draw every points shadow
+            pont.draw()
     
     #remove any deleted curves and their points
     newCurves = []
     newPoints = []
-    for curv in curves:
-        for pont in curv.points:
+    for curve in curves:
+        for pont in curve.points:
             if pont.parentCurve.deleted != True:
                 newPoints.append(pont)
-        if curv.deleted != True:
-            newCurves.append(curv)
+        if curve.deleted != True:
+            newCurves.append(curve)
 
     #ovveride prev arrays with new ones with missing deleted elements
     curves = newCurves
