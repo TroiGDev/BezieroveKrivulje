@@ -3,8 +3,8 @@ import sys
 import math
 
 pygame.init()
-screenWidth = 600
-screenHeight = 400
+screenWidth = 1000
+screenHeight = 500
 screen = pygame.display.set_mode((screenWidth, screenHeight))
 
 #colors
@@ -32,6 +32,8 @@ class point:
         self.color = color
         self.sdw_color = sdw_color
 
+        self.parentCurve = None
+
     def draw(self):
         #draw point circle
         pygame.draw.circle(screen, self.sdw_color, (self.x, self.y + self.pointWidth/2), self.pointWidth)
@@ -54,10 +56,17 @@ class curve:
         self.points = []
         self.end1 = point(self.x - 50, self.y + 50, end_width, c_end, c_end_sdw)
         self.points.append(self.end1)
+        self.end1.parentCurve = self
+
         self.anchor1 = point(self.x, self.y, anchor_width, c_anchor, c_anchor_sdw)
         self.points.append(self.anchor1)
+        self.anchor1.parentCurve = self
+
         self.end2 = point(self.x + 50, self.y - 50, end_width, c_end, c_end_sdw)
         self.points.append(self.end2)
+        self.end2.parentCurve = self
+
+        self.deleted = False
 
     def draw(self):
         #draw circle shadows
@@ -143,6 +152,42 @@ def moveCamera(xdif, ydif):
 
 #-----------------------------------------------------------------------------------------------------
 
+#zoom
+zoomSpeed = 0.001
+def zoomIn(zoomSpeed):
+    #for every point
+    for curve in curves:
+        for point in curve.points:
+            #get point vector from mouse
+            mPos = pygame.mouse.get_pos()
+            mX = mPos[0]
+            mY = mPos[1]
+
+            vX = point.x - mX
+            vY = point.y - mY
+
+            #set new x and y to vector * 1-zoomspeed
+            point.x = mX + vX * (1+zoomSpeed)
+            point.y = mY + vY * (1+zoomSpeed)
+
+def zoomOut(zoomSpeed):
+    #for every point
+    for curve in curves:
+        for point in curve.points:
+            #get point vector from mouse
+            mPos = pygame.mouse.get_pos()
+            mX = mPos[0]
+            mY = mPos[1]
+
+            vX = point.x - mX
+            vY = point.y - mY
+
+            #set new x and y to vector * 1+zoomspeed
+            point.x = mX + vX * (1-zoomSpeed)
+            point.y = mY + vY * (1-zoomSpeed)
+
+#-----------------------------------------------------------------------------------------------------
+
 #initialize curves
 end_width = 7
 anchor_width = 6
@@ -150,6 +195,43 @@ floorHeight = 30
 curves = []
 
 curve1 = curve(screenWidth/2, screenHeight/2, 2)
+
+def addCurve(power):
+    #add quadratic curve at mouse pos
+    mPos = pygame.mouse.get_pos()
+    mX = mPos[0]
+    mY = mPos[1]
+
+    if power == 2:
+        curve2 = curve(mX, mY, 2)
+
+deleteDistance = 50
+def deleteCurve():
+    #get closest point
+
+    #get mouse pos
+    mPos = pygame.mouse.get_pos()
+    mX = mPos[0]
+    mY = mPos[1]
+
+    #get closest point
+    closestMag = 50
+    closestPoint = None
+    for curve in curves:
+        for point in curve.points:
+            #get distance to point
+            vX = mX - point.x
+            vY = mY - point.y
+            mag = math.sqrt(vX * vX + vY * vY)
+            #comapare distances
+            if mag < closestMag and mag < deleteDistance:
+                closestMag = mag
+                closestPoint = point
+    
+    #delete the parent curve of obtained point
+    if closestPoint != None:
+        #set parents curve deletion
+        closestPoint.parentCurve.deleted = True
 
 #-----------------------------------------------------------------------------------------------------
 
@@ -169,6 +251,30 @@ while True:
             if event.button == 1:  # Left mouse button
                 hand.dropPoint()
 
+        #key events that happen only on the first frame of button down
+        elif event.type == pygame.KEYDOWN:
+            keys = pygame.key.get_pressed()
+
+            #adding curves
+            if keys[pygame.K_2]:
+                #add quadratic curve
+                addCurve(2)
+
+            #deleting curves
+            if keys[pygame.K_x]:
+                #delete curve of closest point
+                deleteCurve()
+
+        #zooming in or out with scroll wheel
+        elif event.type == pygame.MOUSEWHEEL:
+            # event.y > 0 --> up
+            # event.y < 0 --> down
+            if event.y > 0:
+                zoomIn(zoomSpeed * 100)
+            if event.y < 0:
+                zoomOut(zoomSpeed * 100)
+
+    #key events that happen every frame
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
         moveCamera(0, -1)
@@ -178,6 +284,12 @@ while True:
         moveCamera(0, 1)
     if keys[pygame.K_d]:
         moveCamera(1, 0)
+
+    #zooming in or out with arrow keys
+    if keys[pygame.K_UP]:
+        zoomIn(zoomSpeed)
+    if keys[pygame.K_DOWN]:
+        zoomOut(zoomSpeed)
 
 ####################################################################
 
@@ -191,4 +303,18 @@ while True:
     for i in range(len(curves)):
         curves[i].draw()
     
+    #remove any deleted curves and their points
+    newCurves = []
+    newPoints = []
+    for curv in curves:
+        for pont in curv.points:
+            if pont.parentCurve.deleted != True:
+                newPoints.append(pont)
+        if curv.deleted != True:
+            newCurves.append(curv)
+
+    #ovveride prev arrays with new ones with missing deleted elements
+    curves = newCurves
+    points = newPoints
+
     pygame.display.flip()
