@@ -83,7 +83,16 @@ class curve2:
         pygame.draw.line(screen, c_floor_sdw, (self.end1.x, self.end1.y + floorHeight), (self.anchor1.x, self.anchor1.y + floorHeight), self.lineWidth)
         pygame.draw.line(screen, c_floor_sdw, (self.anchor1.x, self.anchor1.y + floorHeight), (self.end2.x, self.end2.y + floorHeight), self.lineWidth)
 
-    #def getBezierPoint2(t)
+    def getBezierPoint2(self, t):
+        #interpolate vector end1-anchor
+        sub1X, sub1Y = interpolateVector(t, self.end1.x, self.end1.y, self.anchor1.x, self.anchor1.y) 
+        #interpolate vector anchor-end2
+        sub2X, sub2Y = interpolateVector(t, self.anchor1.x, self.anchor1.y, self.end2.x, self.end2.y) 
+
+        #interpolate vector sub1-sub2
+        fX, fY = interpolateVector(t, sub1X, sub1Y, sub2X, sub2Y)
+
+        return fX, fY
 
     #def drawCurve
 
@@ -134,11 +143,44 @@ class curve3:
         pygame.draw.line(screen, c_floor_sdw, (self.anchor1.x, self.anchor1.y + floorHeight), (self.anchor2.x, self.anchor2.y + floorHeight), self.lineWidth)
         pygame.draw.line(screen, c_floor_sdw, (self.anchor2.x, self.anchor2.y + floorHeight), (self.end2.x, self.end2.y + floorHeight), self.lineWidth)
 
-    #def getBezierPoint3(t)
+    def getBezierPoint3(self, t):
+        #interpolate vector end1-anchor1
+        sub1X, sub1Y = interpolateVector(t, self.end1.x, self.end1.y, self.anchor1.x, self.anchor1.y) 
+        #interpolate vector anchor1-anchor2
+        sub2X, sub2Y = interpolateVector(t, self.anchor1.x, self.anchor1.y, self.anchor2.x, self.anchor2.y) 
+        #interpolate vector anchor2-end2
+        sub3X, sub3Y = interpolateVector(t, self.anchor2.x, self.anchor2.y, self.end2.x, self.end2.y) 
+
+        #interpolate vector sub1-sub2
+        subsub1X, subsub1Y = interpolateVector(t, sub1X, sub1Y, sub2X, sub2Y)
+        #interpolate vector 2ub2-sub3
+        subsub2X, subsub2Y = interpolateVector(t, sub2X, sub2Y, sub3X, sub3Y)
+
+        #interpolate vector subsub1-subsub2
+        fX, fY = interpolateVector(t, subsub1X, subsub1Y, subsub2X, subsub2Y)
+
+        return fX, fY
 
     #def drawCurve
 
     #def drawCurve_sdw
+
+def interpolateVector(t, x1, y1, x2, y2):
+    #get vector
+    vX = x2 - x1
+    vY = y2 - y1
+
+    #normalize and get original length
+    mag = math.sqrt(vX * vX + vY * vY)
+    nX = vX / mag
+    nY = vY / mag
+
+    #multiply by t / mag
+    fX = nX * t/mag
+    fY = nY * t/mag
+    
+    return fX, fY
+
 #-------------------------------------------------------------------------------------------------------------
 
 class mousePointMover:
@@ -350,7 +392,7 @@ while True:
     if keys[pygame.K_DOWN]:
         zoomOut(zoomSpeed)
 
-####################################################################
+    ####################################################################
 
     screen.fill(c_background)
 
