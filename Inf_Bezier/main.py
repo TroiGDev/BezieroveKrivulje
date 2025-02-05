@@ -16,6 +16,8 @@ c_end_sdw = (150, 0, 0)
 c_anchor = (0, 0, 255)
 c_anchor_sdw = (0, 0, 150)
 
+c_curveLine = (255, 255 ,255)
+
 c_line = (150, 150, 150)
 
 c_floor_sdw = (0, 0, 0)
@@ -68,10 +70,14 @@ class curve2:
 
         self.deleted = False
 
-        #self.curveAccuracy = 10
-        #self.bezierPointsX = []
-        #self.bezierPointsY = []
+        self.curveAccuracy = 50
+
         #initialize bezier points as 2 arrays of each coordinate instead of new point object
+        self.bezierPointsX = [0] * self.curveAccuracy
+        self.bezierPointsY = [0] * self.curveAccuracy
+
+        for i in range(self.curveAccuracy):
+            self.bezierPointsX[i], self.bezierPointsY[i] = self.getBezierPoint2(i/self.curveAccuracy, self.end1.x, self.end1.y, self.anchor1.x, self.anchor1.y, self.end2.x, self.end2.y)
 
     def drawSupport(self):
         #draw connection lines
@@ -83,20 +89,32 @@ class curve2:
         pygame.draw.line(screen, c_floor_sdw, (self.end1.x, self.end1.y + floorHeight), (self.anchor1.x, self.anchor1.y + floorHeight), self.lineWidth)
         pygame.draw.line(screen, c_floor_sdw, (self.anchor1.x, self.anchor1.y + floorHeight), (self.end2.x, self.end2.y + floorHeight), self.lineWidth)
 
-    def getBezierPoint2(self, t):
-        #interpolate vector end1-anchor
-        sub1X, sub1Y = interpolateVector(t, self.end1.x, self.end1.y, self.anchor1.x, self.anchor1.y) 
-        #interpolate vector anchor-end2
-        sub2X, sub2Y = interpolateVector(t, self.anchor1.x, self.anchor1.y, self.end2.x, self.end2.y) 
+    def getBezierPoint2(self, t, end1X, end1Y, anc1X, anc1Y, end2X, end2Y):
+        x = (1-t)**2 * end1X + 2*(1-t)*t * anc1X + t**2 * end2X
+        y = (1-t)**2 * end1Y + 2*(1-t)*t * anc1Y + t**2 * end2Y
+        return x, y
 
-        #interpolate vector sub1-sub2
-        fX, fY = interpolateVector(t, sub1X, sub1Y, sub2X, sub2Y)
+    def updateCurvePoints(self):
+        for i in range(self.curveAccuracy):
+            self.bezierPointsX[i], self.bezierPointsY[i] = self.getBezierPoint2(i/self.curveAccuracy, self.end1.x, self.end1.y, self.anchor1.x, self.anchor1.y, self.end2.x, self.end2.y)
 
-        return fX, fY
+    def drawCurve(self):
+        #draw lines between the curve points
+        for i in range(self.curveAccuracy - 1):
+            #draw line between i and i+1
+            pygame.draw.line(screen, c_curveLine, (self.bezierPointsX[i], self.bezierPointsY[i]), (self.bezierPointsX[i + 1], self.bezierPointsY[i + 1]), self.lineWidth)
+        
+        #draw line from last point to end2
+        pygame.draw.line(screen, c_curveLine, (self.bezierPointsX[self.curveAccuracy-1], self.bezierPointsY[self.curveAccuracy-1]), (self.end2.x, self.end2.y), self.lineWidth)
 
-    #def drawCurve
-
-    #def drawCurve_sdw
+    def drawCurve_sdw(self):
+        #draw lines between the curve points
+        for i in range(self.curveAccuracy - 1):
+            #draw line between i and i+1
+            pygame.draw.line(screen, c_floor_sdw, (self.bezierPointsX[i], self.bezierPointsY[i] + floorHeight), (self.bezierPointsX[i + 1], self.bezierPointsY[i + 1] + floorHeight), self.lineWidth)
+        
+        #draw line from last point to end2
+        pygame.draw.line(screen, c_floor_sdw, (self.bezierPointsX[self.curveAccuracy-1], self.bezierPointsY[self.curveAccuracy-1] + floorHeight), (self.end2.x, self.end2.y + floorHeight), self.lineWidth)
 
 class curve3:
     def __init__(self, x, y, lineWidth):
@@ -126,10 +144,14 @@ class curve3:
 
         self.deleted = False
 
-        #self.curveAccuracy = 10
-        #self.bezierPointsX = []
-        #self.bezierPointsY = []
+        self.curveAccuracy = 50
+
         #initialize bezier points as 2 arrays of each coordinate instead of new point object
+        self.bezierPointsX = [0] * self.curveAccuracy
+        self.bezierPointsY = [0] * self.curveAccuracy
+
+        for i in range(self.curveAccuracy):
+            self.bezierPointsX[i], self.bezierPointsY[i] = self.getBezierPoint3(i/self.curveAccuracy, self.end1.x, self.end1.y, self.anchor1.x, self.anchor1.y, self.anchor2.x, self.anchor2.y, self.end2.x, self.end2.y)
 
     def drawSupport(self):
         #draw connection lines
@@ -143,43 +165,38 @@ class curve3:
         pygame.draw.line(screen, c_floor_sdw, (self.anchor1.x, self.anchor1.y + floorHeight), (self.anchor2.x, self.anchor2.y + floorHeight), self.lineWidth)
         pygame.draw.line(screen, c_floor_sdw, (self.anchor2.x, self.anchor2.y + floorHeight), (self.end2.x, self.end2.y + floorHeight), self.lineWidth)
 
-    def getBezierPoint3(self, t):
-        #interpolate vector end1-anchor1
-        sub1X, sub1Y = interpolateVector(t, self.end1.x, self.end1.y, self.anchor1.x, self.anchor1.y) 
-        #interpolate vector anchor1-anchor2
-        sub2X, sub2Y = interpolateVector(t, self.anchor1.x, self.anchor1.y, self.anchor2.x, self.anchor2.y) 
-        #interpolate vector anchor2-end2
-        sub3X, sub3Y = interpolateVector(t, self.anchor2.x, self.anchor2.y, self.end2.x, self.end2.y) 
+    def getBezierPoint3(self, t, end1X, end1Y, anc1X, anc1Y, anc2X, anc2Y, end2X, end2Y):
+        x = (1-t)**3 * end1X + 3*(1-t)**2*t * anc1X + 3*(1-t)*t**2 * anc2X + t**3 * end2X
+        y = (1-t)**3 * end1Y + 3*(1-t)**2*t * anc1Y + 3*(1-t)*t**2 * anc2Y + t**3 * end2Y
 
-        #interpolate vector sub1-sub2
-        subsub1X, subsub1Y = interpolateVector(t, sub1X, sub1Y, sub2X, sub2Y)
-        #interpolate vector 2ub2-sub3
-        subsub2X, subsub2Y = interpolateVector(t, sub2X, sub2Y, sub3X, sub3Y)
+        return x, y
 
-        #interpolate vector subsub1-subsub2
-        fX, fY = interpolateVector(t, subsub1X, subsub1Y, subsub2X, subsub2Y)
+    def updateCurvePoints(self):
+        for i in range(self.curveAccuracy):
+            self.bezierPointsX[i], self.bezierPointsY[i] = self.getBezierPoint3(i/self.curveAccuracy, self.end1.x, self.end1.y, self.anchor1.x, self.anchor1.y, self.anchor2.x, self.anchor2.y, self.end2.x, self.end2.y)
 
-        return fX, fY
+    def drawCurve(self):
+        #draw lines between the curve points
+        for i in range(self.curveAccuracy - 1):
+            #draw line between i and i+1
+            pygame.draw.line(screen, c_curveLine, (self.bezierPointsX[i], self.bezierPointsY[i]), (self.bezierPointsX[i + 1], self.bezierPointsY[i + 1]), self.lineWidth)
+        
+        #draw line from last point to end2
+        pygame.draw.line(screen, c_curveLine, (self.bezierPointsX[self.curveAccuracy-1], self.bezierPointsY[self.curveAccuracy-1]), (self.end2.x, self.end2.y), self.lineWidth)
 
-    #def drawCurve
+    def drawCurve_sdw(self):
+        #draw lines between the curve points
+        for i in range(self.curveAccuracy - 1):
+            #draw line between i and i+1
+            pygame.draw.line(screen, c_floor_sdw, (self.bezierPointsX[i], self.bezierPointsY[i] + floorHeight), (self.bezierPointsX[i + 1], self.bezierPointsY[i + 1] + floorHeight), self.lineWidth)
+        
+        #draw line from last point to end2
+        pygame.draw.line(screen, c_floor_sdw, (self.bezierPointsX[self.curveAccuracy-1], self.bezierPointsY[self.curveAccuracy-1] + floorHeight), (self.end2.x, self.end2.y + floorHeight), self.lineWidth)
 
-    #def drawCurve_sdw
 
-def interpolateVector(t, x1, y1, x2, y2):
-    #get vector
-    vX = x2 - x1
-    vY = y2 - y1
-
-    #normalize and get original length
-    mag = math.sqrt(vX * vX + vY * vY)
-    nX = vX / mag
-    nY = vY / mag
-
-    #multiply by t / mag
-    fX = nX * t/mag
-    fY = nY * t/mag
-    
-    return fX, fY
+def updateAllCurvePointsOnAction():
+    for curve in curves:
+        curve.updateCurvePoints()
 
 #-------------------------------------------------------------------------------------------------------------
 
@@ -332,6 +349,13 @@ def deleteCurve():
         closestPoint.parentCurve.deleted = True
 
 #-----------------------------------------------------------------------------------------------------
+#draw toggles
+drawShadows = True                  #toggle u
+drawSupportLines = True             #toggle i
+drawCurveLines = True               #toggle o
+drawPoints = True                   #toggle p
+
+#-----------------------------------------------------------------------------------------------------
 
 while True:
 
@@ -366,31 +390,64 @@ while True:
                 #delete curve of closest point
                 deleteCurve()
 
+            #draw toggles
+            if keys[pygame.K_u]:
+                if drawShadows:
+                    drawShadows = False
+                else:
+                    drawShadows = True
+
+            if keys[pygame.K_i]:
+                if drawSupportLines:
+                    drawSupportLines = False
+                else:
+                    drawSupportLines = True
+
+            if keys[pygame.K_o]:
+                if drawCurveLines:
+                    drawCurveLines = False
+                else:
+                    drawCurveLines = True
+
+            if keys[pygame.K_p]:
+                if drawPoints:
+                    drawPoints = False
+                else:
+                    drawPoints = True
+
         #zooming in or out with scroll wheel
         elif event.type == pygame.MOUSEWHEEL:
             # event.y > 0 --> up
             # event.y < 0 --> down
             if event.y > 0:
                 zoomIn(zoomSpeed * 100)
+                updateAllCurvePointsOnAction()  #update all curve points due to change
             if event.y < 0:
                 zoomOut(zoomSpeed * 100)
+                updateAllCurvePointsOnAction()  #update all curve points due to change
 
     #key events that happen every frame
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
         moveCamera(0, -1)
+        updateAllCurvePointsOnAction()  #update all curve points due to change
     if keys[pygame.K_a]:
         moveCamera(-1, 0)
+        updateAllCurvePointsOnAction()  #update all curve points due to change
     if keys[pygame.K_s]:
         moveCamera(0, 1)
+        updateAllCurvePointsOnAction()  #update all curve points due to change
     if keys[pygame.K_d]:
         moveCamera(1, 0)
+        updateAllCurvePointsOnAction()  #update all curve points due to change
 
     #zooming in or out with arrow keys
     if keys[pygame.K_UP]:
         zoomIn(zoomSpeed)
+        updateAllCurvePointsOnAction()  #update all curve points due to change
     if keys[pygame.K_DOWN]:
         zoomOut(zoomSpeed)
+        updateAllCurvePointsOnAction()  #update all curve points due to change
 
     ####################################################################
 
@@ -399,24 +456,31 @@ while True:
     #if holding a point, move it
     if hand.isHolding == True:
         hand.movePoint()
-
+        updateAllCurvePointsOnAction()  #update all curve points due to change
+    
     #draw all shadows
-    for curv in curves:
-        #draw every curvs shadow
-        curv.drawSupport_sdw()
+    if drawShadows:
+        for curve in curves:
+            #draw every curvs shadow
+            curve.drawSupport_sdw()
+            curve.drawCurve_sdw()
 
-        for pont in curv.points:
-            #draw every points shadow
-            pont.draw_sdw()
+            for pont in curve.points:
+                #draw every points shadow
+                pont.draw_sdw()
 
     #draw all tops
     for curve in curves:
-        #draw every curvs shadow
-        curve.drawSupport()
+        if drawSupportLines:
+            curve.drawSupport()
 
-        for pont in curve.points:
-            #draw every points shadow
-            pont.draw()
+        if drawCurveLines:
+            curve.drawCurve()
+
+        if drawPoints:
+            for pont in curve.points:
+                #draw every points shadow
+                pont.draw()
     
     #remove any deleted curves and their points
     newCurves = []
