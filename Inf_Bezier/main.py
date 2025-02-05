@@ -330,7 +330,7 @@ def deleteCurve():
     mY = mPos[1]
 
     #get closest point
-    closestMag = 50
+    closestMag = 100
     closestPoint = None
     for curve in curves:
         for point in curve.points:
@@ -348,16 +348,46 @@ def deleteCurve():
         #set parents curve deletion
         closestPoint.parentCurve.deleted = True
 
+snapDistance = 25
+def snapPoints():
+    #get all points in range of mouse position
+    mPos = pygame.mouse.get_pos()
+    mX = mPos[0]
+    mY = mPos[1]
+
+    snappedPoints = []
+    for curve in curves:
+        for point in curve.points:
+            #get distance to mouse pos
+            vX = mX - point.x
+            vY = mY - point.y
+
+            mag = math.sqrt(vX * vX + vY * vY)
+
+            if mag < snapDistance:
+                snappedPoints.append(point)
+    
+    #set all snapped points pos to mouse
+    for point in snappedPoints:
+        point.x = mX
+        point.y = mY
+
 #-----------------------------------------------------------------------------------------------------
 #draw toggles
-drawShadows = True                  #toggle u
+drawPointShadows = True             #toggle z
+drawCurveShadows = True             #toggle u
 drawSupportLines = True             #toggle i
 drawCurveLines = True               #toggle o
 drawPoints = True                   #toggle p
 
 #-----------------------------------------------------------------------------------------------------
 
+clock = pygame.time.Clock()
+
 while True:
+
+    #get delta time
+    deltaTime = clock.tick(60) # 60 FPS
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -390,12 +420,24 @@ while True:
                 #delete curve of closest point
                 deleteCurve()
 
+            #snap points
+            if keys[pygame.K_q]:
+                #delete curve of closest point
+                snapPoints()
+                updateAllCurvePointsOnAction()  #update all curve points due to change
+
             #draw toggles
-            if keys[pygame.K_u]:
-                if drawShadows:
-                    drawShadows = False
+            if keys[pygame.K_z]:
+                if drawPointShadows:
+                    drawPointShadows = False
                 else:
-                    drawShadows = True
+                    drawPointShadows = True
+
+            if keys[pygame.K_u]:
+                if drawCurveShadows:
+                    drawCurveShadows = False
+                else:
+                    drawCurveShadows = True
 
             if keys[pygame.K_i]:
                 if drawSupportLines:
@@ -429,24 +471,24 @@ while True:
     #key events that happen every frame
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
-        moveCamera(0, -1)
+        moveCamera(0, -1 * deltaTime)
         updateAllCurvePointsOnAction()  #update all curve points due to change
     if keys[pygame.K_a]:
-        moveCamera(-1, 0)
+        moveCamera(-1 * deltaTime, 0)
         updateAllCurvePointsOnAction()  #update all curve points due to change
     if keys[pygame.K_s]:
-        moveCamera(0, 1)
+        moveCamera(0, 1 * deltaTime)
         updateAllCurvePointsOnAction()  #update all curve points due to change
     if keys[pygame.K_d]:
-        moveCamera(1, 0)
+        moveCamera(1 * deltaTime, 0)
         updateAllCurvePointsOnAction()  #update all curve points due to change
 
     #zooming in or out with arrow keys
     if keys[pygame.K_UP]:
-        zoomIn(zoomSpeed)
+        zoomIn(zoomSpeed * deltaTime)
         updateAllCurvePointsOnAction()  #update all curve points due to change
     if keys[pygame.K_DOWN]:
-        zoomOut(zoomSpeed)
+        zoomOut(zoomSpeed * deltaTime)
         updateAllCurvePointsOnAction()  #update all curve points due to change
 
     ####################################################################
@@ -459,12 +501,13 @@ while True:
         updateAllCurvePointsOnAction()  #update all curve points due to change
     
     #draw all shadows
-    if drawShadows:
-        for curve in curves:
-            #draw every curvs shadow
-            curve.drawSupport_sdw()
+    for curve in curves:
+        #draw every curvs shadow
+        if drawCurveShadows:
             curve.drawCurve_sdw()
 
+        if drawPointShadows:
+            curve.drawSupport_sdw()
             for pont in curve.points:
                 #draw every points shadow
                 pont.draw_sdw()
