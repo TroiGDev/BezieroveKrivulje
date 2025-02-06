@@ -381,6 +381,36 @@ drawCurveLines = True               #toggle o
 drawPoints = True                   #toggle p
 
 #-----------------------------------------------------------------------------------------------------
+#draw controls
+font = pygame.font.SysFont('impact', 10)
+allstrings = []
+
+# Define text
+cont1 = "wasd - move"
+cont2 = "up/down/scroll - zoom"
+cont3 = "click - grab points"
+cont4 = "2 - create new curve2"
+cont5 = "3 - create new curve3"
+cont6 = "x - delete curve"
+cont7 = "q - snap points"
+cont8 = "z/u/i/o/p - toggle layers"
+
+allstrings.append(cont1)
+allstrings.append(cont2)
+allstrings.append(cont3)
+allstrings.append(cont4)
+allstrings.append(cont5)
+allstrings.append(cont6)
+allstrings.append(cont7)
+allstrings.append(cont8)
+
+def drawControls():
+    cred = font.render("Gašper Korošec 2.b", True, c_curveLine)
+    screen.blit(cred, (5, 5))
+    cont = font.render(cont1 + "                    " + cont2 + "                    " + cont3 + "                    " + cont4 + "                    " + cont5 + "                    " + cont6 + "                    " + cont7 + "                    " + cont8, True, c_curveLine)
+    screen.blit(cont, (45, screenHeight - 15))
+
+#-----------------------------------------------------------------------------------------------------
 
 clock = pygame.time.Clock()
 
@@ -524,6 +554,9 @@ while True:
             for pont in curve.points:
                 #draw every points shadow
                 pont.draw()
+    
+    #draw controls and credits
+    drawControls()
     
     #remove any deleted curves and their points
     newCurves = []
