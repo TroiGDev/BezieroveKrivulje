@@ -6,6 +6,12 @@ pygame.init()
 screenWidth = 1000
 screenHeight = 500
 screen = pygame.display.set_mode((screenWidth, screenHeight))
+pygame.display.set_caption('Krivulje')
+
+#remove window icon
+transparent_surface = pygame.Surface((32, 32), pygame.SRCALPHA)
+transparent_surface.fill((0, 0, 0, 0))
+pygame.display.set_icon(transparent_surface)
 
 #colors
 c_background = (18, 18, 18)
