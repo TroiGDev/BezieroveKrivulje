@@ -1,5 +1,6 @@
 import pygame
 import sys
+import os
 import math
 
 pygame.init()
@@ -53,24 +54,25 @@ class point:
 
 
 class curve2:
-    def __init__(self, x, y, lineWidth):
+    def __init__(self, x, y, end1X, end1Y, anchor1X, anchor1Y, end2X, end2Y, lineWidth):
         curves.append(self)
 
         self.x = x
         self.y = y
+        self.power = 2
 
         self.lineWidth = lineWidth
 
         self.points = []
-        self.end1 = point(self.x - 50, self.y + 50, end_width, c_end, c_end_sdw)
+        self.end1 = point(end1X, end1Y, end_width, c_end, c_end_sdw)
         self.points.append(self.end1)
         self.end1.parentCurve = self
 
-        self.anchor1 = point(self.x, self.y, anchor_width, c_anchor, c_anchor_sdw)
+        self.anchor1 = point(anchor1X, anchor1Y, anchor_width, c_anchor, c_anchor_sdw)
         self.points.append(self.anchor1)
         self.anchor1.parentCurve = self
 
-        self.end2 = point(self.x + 50, self.y - 50, end_width, c_end, c_end_sdw)
+        self.end2 = point(end2X, end2Y, end_width, c_end, c_end_sdw)
         self.points.append(self.end2)
         self.end2.parentCurve = self
 
@@ -118,33 +120,34 @@ class curve2:
         for i in range(self.curveAccuracy - 1):
             #draw line between i and i+1
             pygame.draw.line(screen, c_floor_sdw, (self.bezierPointsX[i], self.bezierPointsY[i] + floorHeight), (self.bezierPointsX[i + 1], self.bezierPointsY[i + 1] + floorHeight), self.lineWidth)
-        
+
         #draw line from last point to end2
         pygame.draw.line(screen, c_floor_sdw, (self.bezierPointsX[self.curveAccuracy-1], self.bezierPointsY[self.curveAccuracy-1] + floorHeight), (self.end2.x, self.end2.y + floorHeight), self.lineWidth)
 
 class curve3:
-    def __init__(self, x, y, lineWidth):
+    def __init__(self, x, y, end1X, end1Y, anchor1X, anchor1Y, anchor2X, anchor2Y, end2X, end2Y, lineWidth):
         curves.append(self)
 
         self.x = x
         self.y = y
+        self.power = 3
 
         self.lineWidth = lineWidth
 
         self.points = []
-        self.end1 = point(self.x - 50, self.y + 50, end_width, c_end, c_end_sdw)
+        self.end1 = point(end1X, end1Y, end_width, c_end, c_end_sdw)
         self.points.append(self.end1)
         self.end1.parentCurve = self
 
-        self.anchor1 = point(self.x - 17, self.y + 17, anchor_width, c_anchor, c_anchor_sdw)
+        self.anchor1 = point(anchor1X, anchor1Y, anchor_width, c_anchor, c_anchor_sdw)
         self.points.append(self.anchor1)
         self.anchor1.parentCurve = self
 
-        self.anchor2 = point(self.x + 17, self.y - 17, anchor_width, c_anchor, c_anchor_sdw)
+        self.anchor2 = point(anchor2X, anchor2Y, anchor_width, c_anchor, c_anchor_sdw)
         self.points.append(self.anchor2)
         self.anchor2.parentCurve = self
 
-        self.end2 = point(self.x + 50, self.y - 50, end_width, c_end, c_end_sdw)
+        self.end2 = point(end2X, end2Y, end_width, c_end, c_end_sdw)
         self.points.append(self.end2)
         self.end2.parentCurve = self
 
@@ -312,8 +315,6 @@ anchor_width = 6
 floorHeight = 30
 curves = []
 
-curv2 = curve2(screenWidth/2, screenHeight/2, 2)
-
 def addCurve(power):
     #add quadratic curve at mouse pos
     mPos = pygame.mouse.get_pos()
@@ -321,10 +322,10 @@ def addCurve(power):
     mY = mPos[1]
 
     if power == 2:
-        curve = curve2(mX, mY, 2)
+        curve = curve2(mX, mY, mX - 50, mY + 50, mX, mY, mX + 50, mY - 50, 2)
 
     if power == 3:
-        curve = curve3(mX, mY, 2)
+        curve = curve3(mX, mY, mX - 50, mY + 50, mX - 17, mY + 17, mX + 17, mY - 17, mX + 50, mY - 50, 2)
 
 deleteDistance = 50
 def deleteCurve():
@@ -378,6 +379,61 @@ def snapPoints():
         point.x = mX
         point.y = mY
 
+#---------------------------------------------------------------------------------------------------------
+#save file
+
+#ask for file name
+def loadFromFile(fileName):
+
+    with open(fileName, 'r') as file:
+        content = file.readlines()
+
+        #divide data and use it to initialize new curves
+        for line in content:
+            #remove newlines
+            line = line.replace("\n", "")
+            print(line)
+
+            #seperate line by spaces, format
+            data = line.split(" ")
+            cPower = int(data[0])
+
+            #continue by format depeding on power
+            if cPower == 2:
+                end1X = int(data[1])
+                end1Y = int(data[2])
+                anchor1X = int(data[3])
+                anchor1Y = int(data[4])
+                end2X = int(data[5])
+                end2Y = int(data[6])
+
+                curve = curve2(0, 0, end1X, end1Y, anchor1X, anchor1Y, end2X, end2Y, cPower)
+
+            elif cPower == 3:
+                end1X = int(data[1])
+                end1Y = int(data[2])
+                anchor1X = int(data[3])
+                anchor1Y = int(data[4])
+                anchor2X = int(data[5])
+                anchor2Y = int(data[6])
+                end2X = int(data[7])
+                end2Y = int(data[8])
+
+                curve = curve3(0, 0, end1X, end1Y, anchor1X, anchor1Y, anchor2X, anchor2Y, end2X, end2Y, cPower)
+
+def saveToFile(fileName):
+    with open(fileName, 'w') as file:
+        #for each curve
+        for curve in curves:
+            #write curves info to file line
+            if curve.power == 2:
+                string = str(round(curve.power)) + " " + str(round(curve.end1.x)) + " " + str(round(curve.end1.y)) + " " + str(round(curve.anchor1.x)) + " " + str(round(curve.anchor1.y)) + " " + str(round(curve.end2.x)) + " " + str(round(curve.end2.y))
+                file.write(string + "\n")
+            
+            if curve.power == 3:
+                string = str(round(curve.power)) + " " + str(round(curve.end1.x)) + " " + str(round(curve.end1.y)) + " " + str(round(curve.anchor1.x)) + " " + str(round(curve.anchor1.y)) + " " + str(round(curve.anchor2.x)) + " " + str(round(curve.anchor2.y)) + " " + str(round(curve.end2.x)) + " " + str(round(curve.end2.y))
+                file.write(string + "\n")
+
 #-----------------------------------------------------------------------------------------------------
 #draw toggles
 drawPointShadows = True             #toggle z
@@ -419,6 +475,19 @@ def drawControls():
 #-----------------------------------------------------------------------------------------------------
 
 clock = pygame.time.Clock()
+
+#load from file on open
+fileName = str(input("Open file: "))
+
+#if file doesnt exist, create it
+if not os.path.exists(fileName):
+    with open(fileName, 'w') as f:
+        pass
+
+#else if it exists, load it
+else:
+    loadFromFile(fileName)
+
 
 while True:
 
@@ -492,6 +561,10 @@ while True:
                     drawPoints = False
                 else:
                     drawPoints = True
+
+            #save picture
+            if keys[pygame.K_e]:
+                saveToFile(fileName)
 
         #zooming in or out with scroll wheel
         elif event.type == pygame.MOUSEWHEEL:
