@@ -477,21 +477,64 @@ def drawControls():
         screen.blit(cont, (5, 50 + 15*i))
 
 #-----------------------------------------------------------------------------------------------------
+#file name input field
+class TextInputField:
+    def __init__(self, x, y, width, height, font_size=32):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = ""
+        self.active = False 
+        
+        # Colors
+        self.inactive_color = pygame.Color('gray20')
+        self.active_color = pygame.Color('lightskyblue3')
+        self.text_color = pygame.Color('white')
+        
+        # Font setup
+        self.font = pygame.font.Font(None, font_size)
+        
+        # Event handling
+        self.return_pressed = False
+    
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # If the user clicked on the input box
+            if self.rect.collidepoint(event.pos):
+                self.active = True
+            else:
+                self.active = False
+                
+        if event.type == pygame.KEYDOWN:
+            if self.active:
+                if event.key == pygame.K_RETURN:
+                    self.return_pressed = True
+                elif event.key == pygame.K_BACKSPACE:
+                    self.text = self.text[:-1]
+                else:
+                    self.text += event.unicode
+                    
+    def draw(self, screen):
+        # Draw the text input box
+        color = self.active_color if self.active else self.inactive_color
+        pygame.draw.rect(screen, color, self.rect, 2)
+        
+        # Render the text
+        text_surface = self.font.render(self.text, True, self.text_color)
+        screen.blit(text_surface, (self.rect.x + 5, self.rect.y + 5))
+        
+        # Show cursor if active
+        if self.active:
+            cursor_x = self.rect.x + text_surface.get_width() + 10
+            pygame.draw.line(screen, self.text_color, 
+                           (cursor_x, self.rect.y + 5),
+                           (cursor_x, self.rect.y + self.rect.height - 5), 2)
+#-----------------------------------------------------------------------------------------------------
 
 clock = pygame.time.Clock()
 
 #load from file on open
-fileName = str(input("Open file: "))
-
-#if file doesnt exist, create it
-if not os.path.exists(fileName):
-    with open(fileName, 'w') as f:
-        pass
-
-#else if it exists, load it
-else:
-    loadFromFile(fileName)
-
+inputField = TextInputField(200, 200, 300, 40)
+fileName = ""
+hasFileName = False
 
 while True:
 
@@ -504,82 +547,98 @@ while True:
             sys.exit()
 
         #handle point movement with mouse
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN and hasFileName:
             if event.button == 1:  # Left mouse button
                 hand.grabPoint()
 
-        elif event.type == pygame.MOUSEBUTTONUP:
+        elif event.type == pygame.MOUSEBUTTONUP and hasFileName:
             if event.button == 1:  # Left mouse button
                 hand.dropPoint()
 
         #key events that happen only on the first frame of button down
-        elif event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN and hasFileName:
             keys = pygame.key.get_pressed()
 
             #adding curves
-            if keys[pygame.K_2]:
+            if keys[pygame.K_2] and hasFileName:
                 #add quadratic curve
                 addCurve(2)
-            if keys[pygame.K_3]:
+            if keys[pygame.K_3] and hasFileName:
                 #add qubic curve
                 addCurve(3)
 
             #deleting curves
-            if keys[pygame.K_x]:
+            if keys[pygame.K_x] and hasFileName:
                 #delete curve of closest point
                 deleteCurve()
 
             #snap points
-            if keys[pygame.K_q]:
+            if keys[pygame.K_q] and hasFileName:
                 #delete curve of closest point
                 snapPoints()
                 updateAllCurvePointsOnAction()  #update all curve points due to change
 
             #draw toggles
-            if keys[pygame.K_z]:
+            if keys[pygame.K_z] and hasFileName:
                 if drawPointShadows:
                     drawPointShadows = False
                 else:
                     drawPointShadows = True
 
-            if keys[pygame.K_u]:
+            if keys[pygame.K_u] and hasFileName:
                 if drawCurveShadows:
                     drawCurveShadows = False
                 else:
                     drawCurveShadows = True
 
-            if keys[pygame.K_i]:
+            if keys[pygame.K_i] and hasFileName:
                 if drawSupportLines:
                     drawSupportLines = False
                 else:
                     drawSupportLines = True
 
-            if keys[pygame.K_o]:
+            if keys[pygame.K_o] and hasFileName:
                 if drawCurveLines:
                     drawCurveLines = False
                 else:
                     drawCurveLines = True
 
-            if keys[pygame.K_p]:
+            if keys[pygame.K_p] and hasFileName:
                 if drawPoints:
                     drawPoints = False
                 else:
                     drawPoints = True
 
             #save picture
-            if keys[pygame.K_e]:
+            if keys[pygame.K_e] and hasFileName:
                 saveToFile(fileName)
 
         #zooming in or out with scroll wheel
-        elif event.type == pygame.MOUSEWHEEL:
-            # event.y > 0 --> up
-            # event.y < 0 --> down
+        elif event.type == pygame.MOUSEWHEEL and hasFileName:
             if event.y > 0:
                 zoomIn(zoomSpeed * 100)
                 updateAllCurvePointsOnAction()  #update all curve points due to change
             if event.y < 0:
                 zoomOut(zoomSpeed * 100)
                 updateAllCurvePointsOnAction()  #update all curve points due to change
+
+        #handle input field events
+        inputField.handle_event(event)
+    
+        # Get text when Enter is pressed
+        if inputField.return_pressed:
+            #if file doesnt exist, create it
+            if not os.path.exists(inputField.text):
+                with open(inputField.text, 'w') as f:
+                    pass
+            #else if it exists, load it
+            else:
+                loadFromFile(inputField.text)
+
+            fileName = inputField.text
+            inputField.text = ''  # Clear the input
+            inputField.return_pressed = False
+            hasFileName = True
 
     #key events that happen every frame
     keys = pygame.key.get_pressed()
@@ -608,51 +667,57 @@ while True:
 
     screen.fill(c_background)
 
-    #if holding a point, move it
-    if hand.isHolding == True:
-        hand.movePoint()
-        updateAllCurvePointsOnAction()  #update all curve points due to change
-    
-    #draw all shadows
-    for curve in curves:
-        #draw every curvs shadow
-        if drawCurveShadows:
-            curve.drawCurve_sdw()
+    #if doesnt have file name
+    if hasFileName == False:
+        inputField.draw(screen)
 
-        if drawPointShadows:
-            curve.drawSupport_sdw()
+    #if has file name
+    if hasFileName:
+        #if holding a point, move it
+        if hand.isHolding == True:
+            hand.movePoint()
+            updateAllCurvePointsOnAction()  #update all curve points due to change
+        
+        #draw all shadows
+        for curve in curves:
+            #draw every curvs shadow
+            if drawCurveShadows:
+                curve.drawCurve_sdw()
+
+            if drawPointShadows:
+                curve.drawSupport_sdw()
+                for pont in curve.points:
+                    #draw every points shadow
+                    pont.draw_sdw()
+
+        #draw all tops
+        for curve in curves:
+            if drawSupportLines:
+                curve.drawSupport()
+
+            if drawCurveLines:
+                curve.drawCurve()
+
+            if drawPoints:
+                for pont in curve.points:
+                    #draw every points shadow
+                    pont.draw()
+        
+        #draw controls and credits
+        drawControls()
+        
+        #remove any deleted curves and their points
+        newCurves = []
+        newPoints = []
+        for curve in curves:
             for pont in curve.points:
-                #draw every points shadow
-                pont.draw_sdw()
+                if pont.parentCurve.deleted != True:
+                    newPoints.append(pont)
+            if curve.deleted != True:
+                newCurves.append(curve)
 
-    #draw all tops
-    for curve in curves:
-        if drawSupportLines:
-            curve.drawSupport()
-
-        if drawCurveLines:
-            curve.drawCurve()
-
-        if drawPoints:
-            for pont in curve.points:
-                #draw every points shadow
-                pont.draw()
-    
-    #draw controls and credits
-    drawControls()
-    
-    #remove any deleted curves and their points
-    newCurves = []
-    newPoints = []
-    for curve in curves:
-        for pont in curve.points:
-            if pont.parentCurve.deleted != True:
-                newPoints.append(pont)
-        if curve.deleted != True:
-            newCurves.append(curve)
-
-    #ovveride prev arrays with new ones with missing deleted elements
-    curves = newCurves
-    points = newPoints
+        #ovveride prev arrays with new ones with missing deleted elements
+        curves = newCurves
+        points = newPoints
 
     pygame.display.flip()
