@@ -206,6 +206,10 @@ class curve3:
 def updateAllCurvePointsOnAction():
     for curve in curves:
         curve.updateCurvePoints()
+    
+    #save changes automaticaly
+    if hasFileName:
+        saveToFile(fileName)
 
 #-------------------------------------------------------------------------------------------------------------
 
@@ -441,10 +445,11 @@ drawCurveShadows = True             #toggle u
 drawSupportLines = True             #toggle i
 drawCurveLines = True               #toggle o
 drawPoints = True                   #toggle p
+drawInstructions = True             #toggle t
 
 #-----------------------------------------------------------------------------------------------------
 #draw controls
-font = pygame.font.SysFont('impact', 10)
+font = pygame.font.SysFont('impact', 15)
 allstrings = []
 
 # Define text
@@ -456,7 +461,7 @@ cont5 = "3 - create new curve3"
 cont6 = "x - delete curve"
 cont7 = "q - snap points"
 cont8 = "z/u/i/o/p - toggle layers"
-cont9 = "e - save"
+cont9 = "t - toggle instructions"
 
 allstrings.append(cont1)
 allstrings.append(cont2)
@@ -469,12 +474,13 @@ allstrings.append(cont8)
 allstrings.append(cont9)
 
 def drawControls():
-    cred = font.render("Gašper Korošec 2.b", True, c_curveLine)
-    screen.blit(cred, (5, 5))
+    if drawInstructions:
+        cred = font.render("Gašper Korošec 2.b", True, c_curveLine)
+        screen.blit(cred, (5, 5))
 
-    for i in range(len(allstrings)):
-        cont = font.render(allstrings[i], True, c_curveLine)
-        screen.blit(cont, (5, 50 + 15*i))
+        for i in range(len(allstrings)):
+            cont = font.render(allstrings[i], True, c_curveLine)
+            screen.blit(cont, (5, 50 + 15*i))
 
 #-----------------------------------------------------------------------------------------------------
 #file name input field
@@ -486,7 +492,7 @@ class TextInputField:
         
         # Colors
         self.inactive_color = pygame.Color('gray20')
-        self.active_color = pygame.Color('lightskyblue3')
+        self.active_color = pygame.Color('white')
         self.text_color = pygame.Color('white')
         
         # Font setup
@@ -532,7 +538,7 @@ class TextInputField:
 clock = pygame.time.Clock()
 
 #load from file on open
-inputField = TextInputField(200, 200, 300, 40)
+inputField = TextInputField(5, 105, 300, 40)
 fileName = ""
 hasFileName = False
 
@@ -609,9 +615,11 @@ while True:
                 else:
                     drawPoints = True
 
-            #save picture
-            if keys[pygame.K_e] and hasFileName:
-                saveToFile(fileName)
+            if keys[pygame.K_t] and hasFileName:
+                if drawInstructions:
+                    drawInstructions = False
+                else:
+                    drawInstructions = True
 
         #zooming in or out with scroll wheel
         elif event.type == pygame.MOUSEWHEEL and hasFileName:
@@ -670,6 +678,8 @@ while True:
     #if doesnt have file name
     if hasFileName == False:
         inputField.draw(screen)
+        instr = font.render("This is a simple scalable vector graphics application\n for drawing using quadratic and qubic bezier curves! \n \n To create a new file enter the desired name followed by .txt \n To open an already existing file enter its name followed by .txt", True, c_curveLine)
+        screen.blit(instr, (5, 5))
 
     #if has file name
     if hasFileName:
