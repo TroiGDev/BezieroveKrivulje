@@ -1,0 +1,1 @@
+pyinstaller C:\Users\Admin\Desktop\Inf\Inf_BezieroveKrivulje\Source\main.py --onefile --name BezierCurves --windowed --icon=C:\Users\Admin\Desktop\KrivuljeLogo.ico
