@@ -206,10 +206,6 @@ class curve3:
 def updateAllCurvePointsOnAction():
     for curve in curves:
         curve.updateCurvePoints()
-    
-    #save changes automaticaly
-    if hasFileName:
-        saveToFile(fileName)
 
 #-------------------------------------------------------------------------------------------------------------
 
@@ -462,6 +458,7 @@ cont6 = "x - delete curve"
 cont7 = "q - snap points"
 cont8 = "z/u/i/o/p - toggle layers"
 cont9 = "t - toggle instructions"
+cont10 = "e - manual save"
 
 allstrings.append(cont1)
 allstrings.append(cont2)
@@ -472,6 +469,7 @@ allstrings.append(cont6)
 allstrings.append(cont7)
 allstrings.append(cont8)
 allstrings.append(cont9)
+allstrings.append(cont10)
 
 def drawControls():
     if drawInstructions:
@@ -542,6 +540,9 @@ inputField = TextInputField(5, 105, 300, 40)
 fileName = ""
 hasFileName = False
 
+reqSaveTime = 3500
+curSaveTime = 0
+
 while True:
 
     #get delta time
@@ -577,12 +578,6 @@ while True:
             if keys[pygame.K_x] and hasFileName:
                 #delete curve of closest point
                 deleteCurve()
-
-            #snap points
-            if keys[pygame.K_q] and hasFileName:
-                #delete curve of closest point
-                snapPoints()
-                updateAllCurvePointsOnAction()  #update all curve points due to change
 
             #draw toggles
             if keys[pygame.K_z] and hasFileName:
@@ -620,6 +615,10 @@ while True:
                     drawInstructions = False
                 else:
                     drawInstructions = True
+
+            #manual save
+            if keys[pygame.K_e] and hasFileName:
+                saveToFile(fileName)
 
         #zooming in or out with scroll wheel
         elif event.type == pygame.MOUSEWHEEL and hasFileName:
@@ -663,6 +662,11 @@ while True:
         moveCamera(1 * deltaTime, 0)
         updateAllCurvePointsOnAction()  #update all curve points due to change
 
+    #constant snap points
+    if keys[pygame.K_q]:
+        snapPoints()
+        updateAllCurvePointsOnAction()  #update all curve points due to change
+
     #zooming in or out with arrow keys
     if keys[pygame.K_UP]:
         zoomIn(zoomSpeed * deltaTime)
@@ -683,6 +687,12 @@ while True:
 
     #if has file name
     if hasFileName:
+        #save file if over time requirement
+        curSaveTime += 1 * deltaTime
+        if curSaveTime > reqSaveTime:
+            saveToFile(fileName)
+            curSaveTime = 0
+
         #if holding a point, move it
         if hand.isHolding == True:
             hand.movePoint()
