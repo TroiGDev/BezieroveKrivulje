@@ -11,7 +11,7 @@ NAVODILA ZA UPORABO APLIKACIJE:
 
 -  Ko je program naložen ga odprite
 
--  Če vas Windows opozori o varnosti datoteke pritisnite "več informacij" ter "vseeno zaženi"...
+-  ... Če vas Windows opozori o varnosti datoteke opozorila prosim ignorirajte :) ...
 
 -  Ko bo program odprt lahko pričnete z novo datoteko in risanjem Bezierovih krivulj
 
