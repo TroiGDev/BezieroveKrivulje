@@ -1,1 +1,21 @@
+Command to form .exe file:
 pyinstaller C:\Users\Admin\Desktop\Inf\Inf_BezierCurves\Source\main.py --onefile --name BezierCurves --windowed --icon=C:\Users\Admin\Desktop\Inf\Inf_BezierCurves\Executable\KrivuljeLogo.ico
+
+...
+
+Commands to update outdated .exe files on cloud with new local ones:
+# Remove the old file completely
+git lfs uninstall
+git rm --cached old_file.exe
+rm old_file.exe
+
+# Set up fresh LFS tracking
+git lfs install
+git lfs track "*.exe"
+git add .gitattributes
+
+# Add the new file
+cp /path/to/new_file.exe .
+git add new_file.exe
+git commit -m "Replace executable with new version"
+git push origin main
