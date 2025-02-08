@@ -1,3 +1,12 @@
+#------------------------------------------------------------------------------------------
+# NOTE FROM THE DEV:
+# This is not my best work code-wise
+# There are a lot of improvements that could be made and i am fully aware of it
+# It is not meant to be optimized. If it was supposed to be optimized i wouldnt have used python...
+# This project is supposed to be a replacement to my work on boring python "Tomo"(Sorry FMF programming club) challanges in informatics class
+#    and a way to finaly try rendering bezier curves as its something i wanted to try for a while now
+#------------------------------------------------------------------------------------------
+
 import pygame
 import sys
 import os
