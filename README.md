@@ -16,3 +16,10 @@ NAVODILA ZA UPORABO APLIKACIJE:
 -  Ko bo program odprt lahko pričnete z novo datoteko in risanjem Bezierovih krivulj
 
 Oglejte si tudi kakšne pripravljene primere v "Examples"
+
+...
+
+V prihodnosti bom najverjetneje dodal tudi:
+- Šifriranje datotek slik
+- Shranjevanje preferenc datoteke (vključene plasti, prikaz kontrol...)
+- Izbiranje krivulj, kopiranje in lepljenje, rotiranje ter povečanje in zmanjševanje 
