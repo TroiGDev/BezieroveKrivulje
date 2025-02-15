@@ -20,6 +20,6 @@ Oglejte si tudi kakšne pripravljene primere v "Examples"
 ...
 
 V prihodnosti bom najverjetneje dodal tudi:
-- Šifriranje datotek slik
+- Uporaba JSON namesto txt formata za shranjevanje podatkov slik
 - Shranjevanje preferenc datoteke (vključene plasti, prikaz kontrol...)
 - Izbiranje krivulj, kopiranje in lepljenje, rotiranje ter povečanje in zmanjševanje 
