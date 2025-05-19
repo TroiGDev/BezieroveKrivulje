@@ -254,12 +254,172 @@ V zanki je zaporedje izvedbe operacij zelo pomembno. Na začetku je vnos, v kate
 
 Možnosti vnosa so razdeljene na 2 glavni skupini, vnos, ki se zgodi prvi "frame" po tem ko je tipka pritisnjena in vnos, ki se zgodi vsak "frame" kadar je tipka pritisnjena.
 
-//input
+```
+while True:
 
-//move held points
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
 
-//draw layers
+        #handle point movement with mouse
+        elif event.type == pygame.MOUSEBUTTONDOWN and hasFileName:
+            if event.button == 1:  # Left mouse button
+                hand.grabPoint()
 
-//remove deleted curves
+        elif event.type == pygame.MOUSEBUTTONUP and hasFileName:
+            if event.button == 1:  # Left mouse button
+                hand.dropPoint()
 
+        #key events that happen only on the first frame of button down
+        elif event.type == pygame.KEYDOWN and hasFileName:
+            keys = pygame.key.get_pressed()
+
+            #adding curves
+            if keys[pygame.K_2] and hasFileName:
+                #add quadratic curve
+                addCurve(2)
+            if keys[pygame.K_3] and hasFileName:
+                #add qubic curve
+                addCurve(3)
+
+            #deleting curves
+            if keys[pygame.K_x] and hasFileName:
+                #delete curve of closest point
+                deleteCurve()
+
+            #draw toggles
+            if keys[pygame.K_z] and hasFileName:
+                if drawPointShadows:
+                    drawPointShadows = False
+                else:
+                    drawPointShadows = True
+
+            if keys[pygame.K_u] and hasFileName:
+                if drawCurveShadows:
+                    drawCurveShadows = False
+                else:
+                    drawCurveShadows = True
+
+            if keys[pygame.K_i] and hasFileName:
+                if drawSupportLines:
+                    drawSupportLines = False
+                else:
+                    drawSupportLines = True
+
+            if keys[pygame.K_o] and hasFileName:
+                if drawCurveLines:
+                    drawCurveLines = False
+                else:
+                    drawCurveLines = True
+
+            if keys[pygame.K_p] and hasFileName:
+                if drawPoints:
+                    drawPoints = False
+                else:
+                    drawPoints = True
+
+            if keys[pygame.K_t] and hasFileName:
+                if drawInstructions:
+                    drawInstructions = False
+                else:
+                    drawInstructions = True
+
+            #manual save
+            if keys[pygame.K_e] and hasFileName:
+                saveToFile(fileName)
+
+        #zooming in or out with scroll wheel
+        elif event.type == pygame.MOUSEWHEEL and hasFileName:
+            if event.y > 0:
+                zoomIn(zoomSpeed * 100)
+                updateAllCurvePointsOnAction()  #update all curve points due to change
+            if event.y < 0:
+                zoomOut(zoomSpeed * 100)
+                updateAllCurvePointsOnAction()  #update all curve points due to change
+```
+
+```
+    #key events that happen every frame
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w]:
+        moveCamera(0, -1 * deltaTime)
+        updateAllCurvePointsOnAction()  #update all curve points due to change
+    if keys[pygame.K_a]:
+        moveCamera(-1 * deltaTime, 0)
+        updateAllCurvePointsOnAction()  #update all curve points due to change
+    if keys[pygame.K_s]:
+        moveCamera(0, 1 * deltaTime)
+        updateAllCurvePointsOnAction()  #update all curve points due to change
+    if keys[pygame.K_d]:
+        moveCamera(1 * deltaTime, 0)
+        updateAllCurvePointsOnAction()  #update all curve points due to change
+
+    #constant snap points
+    if keys[pygame.K_q]:
+        snapPoints()
+        updateAllCurvePointsOnAction()  #update all curve points due to change
+
+    #zooming in or out with arrow keys
+    if keys[pygame.K_UP]:
+        zoomIn(zoomSpeed * deltaTime)
+        updateAllCurvePointsOnAction()  #update all curve points due to change
+    if keys[pygame.K_DOWN]:
+        zoomOut(zoomSpeed * deltaTime)
+        updateAllCurvePointsOnAction()  #update all curve points due to change
+```
+
+Nazadnje pa še risanje, kjer se v zaporedju rišejo sloji.
+```
+#draw all shadows
+        for curve in curves:
+            #draw every curvs shadow
+            if drawCurveShadows:
+                curve.drawCurve_sdw()
+
+            if drawPointShadows:
+                curve.drawSupport_sdw()
+                for pont in curve.points:
+                    #draw every points shadow
+                    pont.draw_sdw()
+
+        #draw all tops
+        for curve in curves:
+            if drawSupportLines:
+                curve.drawSupport()
+
+            if drawCurveLines:
+                curve.drawCurve()
+
+            if drawPoints:
+                for pont in curve.points:
+                    #draw every points shadow
+                    pont.draw()
+        
+        #draw controls and credits
+        drawControls()
+```
+Dodatno pa se upravlja odstranjevanje objektov, kjer se vsak objekt v seznamu doda v novi seznam za naslednji "frame", če ta objekt ni bil izbirsan trenutni "frame".
+```
+#remove any deleted curves and their points
+        newCurves = []
+        newPoints = []
+        for curve in curves:
+            for pont in curve.points:
+                if pont.parentCurve.deleted != True:
+                    newPoints.append(pont)
+            if curve.deleted != True:
+                newCurves.append(curve)
+
+        #ovveride prev arrays with new ones with missing deleted elements
+        curves = newCurves
+        points = newPoints
+```
+
+### Zaključek
+Trenutna dokumentacija ne obsega vsega, saj preskoči shranjevanje podatkov, vodilno besedilo za kontrole in manjše detajle.
+
+Napisana je v obliki predstavitve in ne realistične dokumentacije, ki bi jo nekdo morda hotel uporabiti za modifikacijo in gradnjo lastne verzije.
+
+(Zavedam se tudi, da bi se dalo kodo izboljšati in polepšati, kot npr. več datotek kode namesto samo main.py, implementacija bezierove krivulje s parametrom stopnje, torej tudi krivulje nad kubičnimi, boljši sistem shranjevanja podatkov, lepši uporabniški vmesnik itd.)
 
