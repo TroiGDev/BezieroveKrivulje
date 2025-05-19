@@ -17,8 +17,6 @@ NAVODILA ZA UPORABO APLIKACIJE:
 
 Oglejte si tudi kakšne pripravljene primere v "Examples"
 
-...
-
 V prihodnosti bom najverjetneje dodal tudi:
 - Uporaba JSON namesto txt formata za shranjevanje podatkov slik
 - Shranjevanje preferenc datoteke (vključene plasti, prikaz kontrol...)
