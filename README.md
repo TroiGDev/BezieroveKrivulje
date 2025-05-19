@@ -3,7 +3,7 @@ Python Pygame Interaktivne Bezierove Krivulje
 
 BezierCurves.exe je enostavna aplikacija za risanje vektorskih grafik z uporabo kvadratnih in kubičnih Bezierovih krivulj.
 
-...
+[Dokumentacija Kode](./Dokumentacija.md)
 
 NAVODILA ZA UPORABO APLIKACIJE:
 
