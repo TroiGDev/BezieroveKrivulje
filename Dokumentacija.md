@@ -1,6 +1,8 @@
 ### Bezierove Krivulje
 Bezierova krivulja je "gladka" krivulja, ki se pogosto uporablja v računalniški (vektorski) grafiki.
-[Bezier curve](https://en.wikipedia.org/wiki/B%C3%A9zier_curve)
+
+[Bézier curve](https://en.wikipedia.org/wiki/B%C3%A9zier_curve)
+
 Glavni princip bezierove krivulje je to, da preko linearne interpolacije med dvema točkama dobimo novo točko, s katero nadaljujemo verigo interpolacij dokler ne dobimo končne točke.
 #### Programski jezik in knjižnice
 Za mojo implementacijo sem uporabil programski jezik Python in grafični prikazovalnik Pygame. Za dodatno zmogljivost in funkcije pa sem uporabil ```math``` in ```sys``` ter ```os``` za shranjevanje podatkov.
@@ -19,7 +21,7 @@ screenHeight = 500
 screen = pygame.display.set_mode((screenWidth, screenHeight))
 pygame.display.set_caption('Krivulje')
 ```
-Nato se v globalnem obsegu inicializirajo vse barve, za katere sem uporabil RGB format.
+Nato v globalnem obsegu inicializiramo vse barve, za katere uporabimo RGB format.
 ```
 c_end = (255, 0, 0)
 c_end_sdw = (150, 0, 0)
@@ -30,9 +32,9 @@ c_line = (150, 150, 150)
 c_floor_sdw = (0, 0, 0)
 ```
 #### - Objekti
-Nadaljujemo z definiranjem glafnih razredeov, kot so točka in kvadratna ter kubična krivulja.
+Nadaljujemo z definiranjem glavnih razredeov, kot so točka in kvadratna ter kubična krivulja.
 
-Preprosta točka ima pozicijo v ravnini, širino narisanega kroga, barvo narisanega kroga in barvo sence narisanega kroga.
+Preprosta točka ima pozicijo v ravnini ```x, y```, širino narisanega kroga ```pointWidth```, barvo narisanega kroga ```color``` in barvo sence narisanega kroga ```sdw_color```.
 Za lažje sklicevanje je vsaki točki določena tudi starševska krivulja.
 ```
 class point:
@@ -47,7 +49,7 @@ class point:
 
         self.parentCurve = None
 ```
-Točko narišemo tako, da narižemo vsak sloj ločeno, zato definiramo fuknciji draw in drawSdw (risanje sence).
+Točko narišemo tako, da narišemo vsak sloj ločeno, zato definiramo fuknciji ```draw``` in ```draw_sdw``` (risanje sence).
 ```
     def draw(self):
         #draw point circle
@@ -58,9 +60,10 @@ Točko narišemo tako, da narižemo vsak sloj ločeno, zato definiramo fuknciji 
         #draw floor shadow
         pygame.draw.circle(screen, c_floor_sdw, (self.x, self.y + floorHeight), self.pointWidth)
 ```
-Bolj kompleksni strukturi pa sta kvadratna krivulja (curve2) in kubična krivulje (curve3), ki ju definiramo ločeno, čeprav med njima ni velike razlike.
-Vsaki krivulji določamo širino črte, seznam točk, ki sestavljajo krivuljo, konstruktorske točke (konec krivulje, omejitvene točke, ter drugi konec krivulje)
-Tukaj je potrebno omeniti način risanja krivulj. Vsaka krivulja je sestavljena iz ravnih črt med dvema sosednjima točkama, število teh točk predstavlja natančnost prikaza krivulje.
+Bolj kompleksni strukturi pa sta kvadratna krivulja ```curve2``` in kubična krivulja ```curve3```, ki ju definiramo ločeno, čeprav med njima ni velike razlike.
+
+Vsaki krivulji določimo širino črte ```lineWidth```, seznam točk ```points```, ki sestavljajo krivuljo, konstruktorske točke (konec krivulje ```end1```, omejitvene točke ```anchor1, anchor2```, ter drugi konec krivulje ```end2```)
+Tukaj je potrebno omeniti način risanja krivulj. Vsaka krivulja je sestavljena iz ravnih črt med dvema sosednjima točkama, število teh točk predstavlja natančnost prikaza krivulje ```curveAccuracy```.
 ```
 class curve2:
     def __init__(self, x, y, end1X, end1Y, anchor1X, anchor1Y, end2X, end2Y, lineWidth):
@@ -84,8 +87,11 @@ class curve2:
         self.end2 = point(end2X, end2Y, end_width, c_end, c_end_sdw)
         self.points.append(self.end2)
         self.end2.parentCurve = self
+
+        self.curveAccuracy = 50
 ```
-Mogoče ste opazili tudi funkcijo append, katero uporabimo za pripenjanje objekta v seznam, iz katerega sklicujemo funkcije vsakega elementa v zanki.
+Mogoče ste opazili tudi pythonovo funkcijo ```append```, katero uporabimo za pripenjanje objekta v seznam, iz katerega sklicujemo funkcije vsakega elementa v zanki.
+
 Ko inicializiramo krivulje pa se inicializirajo tudi vse njene točke.
 ```
 for i in range(self.curveAccuracy):
@@ -97,7 +103,7 @@ Ko premikamo konstruktivne točke krivulje, moramo tudi posodobiti pozicijo vseh
         for i in range(self.curveAccuracy):
             self.bezierPointsX[i], self.bezierPointsY[i] = self.getBezierPoint2(i/self.curveAccuracy, self.end1.x, self.end1.y, self.anchor1.x, self.anchor1.y, self.end2.x, self.end2.y)
 ```
-Za izračun nove pozicije točke pa uporabimo funkciji ```getBezierPoint2``` in ```getBezierPoint3``` (getBezierPoint2 za kvadratne krivulje in getBezierPoint3 za kubične).
+Za izračun nove pozicije točke pa uporabimo funkciji ```getBezierPoint2``` in ```getBezierPoint3``` (getBezierPoint2 za kvadratne krivulje in getBezierPoint3 za kubične krivulje).
 ```
     def getBezierPoint2(self, t, end1X, end1Y, anc1X, anc1Y, end2X, end2Y):
         x = (1-t)**2 * end1X + 2*(1-t)*t * anc1X + t**2 * end2X
@@ -148,7 +154,7 @@ Tako kot pri točkah, moramo črte in sence vsake krivulje narisati po slojih.
 
 #### - dodatno - premikanje točk, kamera
 Za glavni vnos (premikanje konstruktivnih točk krivulj z miško) uporabimo objekt ```mousePointMover```, s katerim 
-upravljamo katera točka je prijeta ob pritisku, kako to točko premaknemo in kako spustimo.
+upravljamo prijem točke ob pritisku ```grabPoint```, kako to točko premaknemo ```movePoint``` in kako izpustimo ```dropPoint```.
 ```
 class mousePointMover:
     def __init__(self):
@@ -198,7 +204,7 @@ class mousePointMover:
         self.grabbedPoint = None
         self.isHolding = False
 ```
-Za premikanje in povečavo kamere ne uporabimo objekta, ker kadar premikamo kamero, v resnici premikamo vse drugo v nasprotno smer, za kar ne potrebujemo objekta, potrebujemo pa fukncije.
+Za premikanje in povečavo kamere ne uporabimo objekta, saj kadar premikamo kamero, v resnici premikamo vse drugo v nasprotno smer, za kar ne potrebujemo objekta, potrebujemo pa fukncije ```moveCamera, zoomIn, zoomOut```.
 
 ```
 #move camera
@@ -248,7 +254,7 @@ def zoomOut(zoomSpeed):
 
 #### - While loop
 
-Glavna zanka while je zanka, ki omogoča da program teče dokler ga ne ustavimo. V njej se izvede vse kar se tiče uporabnikovega vnosa, posodobitve objektov in risanja na zaslon.
+Glavna zanka ```while``` je zanka, ki omogoča da program teče dokler ga ne ustavimo. V njej se izvede vse kar se tiče uporabnikovega vnosa, posodobitve objektov in risanja na zaslon.
 
 V zanki je zaporedje izvedbe operacij zelo pomembno. Na začetku je vnos, v katerem se izvede tudi posodobitev in šele nato risanje.
 
@@ -371,7 +377,7 @@ while True:
 
 Nazadnje pa še risanje, kjer se v zaporedju rišejo sloji.
 ```
-#draw all shadows
+        #draw all shadows
         for curve in curves:
             #draw every curvs shadow
             if drawCurveShadows:
@@ -399,9 +405,9 @@ Nazadnje pa še risanje, kjer se v zaporedju rišejo sloji.
         #draw controls and credits
         drawControls()
 ```
-Dodatno pa se upravlja odstranjevanje objektov, kjer se vsak objekt v seznamu doda v novi seznam za naslednji "frame", če ta objekt ni bil izbirsan trenutni "frame".
+Dodatno pa se upravlja tudi odstranjevanje objektov, kjer objekt dodamo v novi seznam za naslednji "frame", če ta objekt ni bil izbirsan trenutni "frame".
 ```
-#remove any deleted curves and their points
+        #remove any deleted curves and their points
         newCurves = []
         newPoints = []
         for curve in curves:
