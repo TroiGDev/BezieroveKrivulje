@@ -63,6 +63,7 @@ Točko narišemo tako, da narišemo vsak sloj ločeno, zato definiramo fuknciji 
 Bolj kompleksni strukturi pa sta kvadratna krivulja ```curve2``` in kubična krivulja ```curve3```, ki ju definiramo ločeno, čeprav med njima ni velike razlike.
 
 Vsaki krivulji določimo širino črte ```lineWidth```, seznam točk ```points```, ki sestavljajo krivuljo, konstruktorske točke (konec krivulje ```end1```, omejitvene točke ```anchor1, anchor2```, ter drugi konec krivulje ```end2```)
+
 Tukaj je potrebno omeniti način risanja krivulj. Vsaka krivulja je sestavljena iz ravnih črt med dvema sosednjima točkama, število teh točk predstavlja natančnost prikaza krivulje ```curveAccuracy```.
 ```
 class curve2:
@@ -90,6 +91,14 @@ class curve2:
 
         self.curveAccuracy = 50
 ```
+
+(dodatna konstruktorska točka pri kubični krivulji)
+```
+        self.anchor2 = point(anchor2X, anchor2Y, anchor_width, c_anchor, c_anchor_sdw)
+        self.points.append(self.anchor2)
+        self.anchor2.parentCurve = self
+```
+
 Mogoče ste opazili tudi pythonovo funkcijo ```append```, katero uporabimo za pripenjanje objekta v seznam, iz katerega sklicujemo funkcije vsakega elementa v zanki.
 
 Ko inicializiramo krivulje pa se inicializirajo tudi vse njene točke.
@@ -97,7 +106,7 @@ Ko inicializiramo krivulje pa se inicializirajo tudi vse njene točke.
 for i in range(self.curveAccuracy):
             self.bezierPointsX[i], self.bezierPointsY[i] = self.getBezierPoint2(i/self.curveAccuracy, self.end1.x, self.end1.y, self.anchor1.x, self.anchor1.y, self.end2.x, self.end2.y)
 ```
-Ko premikamo konstruktivne točke krivulje, moramo tudi posodobiti pozicijo vseh njenih točk, tukaj uporabimo funkcijo ```updateCurvePoints```, ki za vsako točko preračuna novo pozicijo.
+Ko premikamo konstruktorske točke krivulje, moramo tudi posodobiti pozicijo vseh njenih točk, tukaj uporabimo funkcijo ```updateCurvePoints```, ki za vsako točko preračuna novo pozicijo.
 ```
     def updateCurvePoints(self):
         for i in range(self.curveAccuracy):
@@ -152,8 +161,8 @@ Tako kot pri točkah, moramo črte in sence vsake krivulje narisati po slojih.
         pygame.draw.line(screen, c_floor_sdw, (self.anchor2.x, self.anchor2.y + floorHeight), (self.end2.x, self.end2.y + floorHeight), self.lineWidth)
 ```
 
-#### - dodatno - premikanje točk, kamera
-Za glavni vnos (premikanje konstruktivnih točk krivulj z miško) uporabimo objekt ```mousePointMover```, s katerim 
+#### - dodatno: premikanje točk, kamera
+Za glavni vnos (premikanje konstruktorskih točk krivulj z miško) uporabimo objekt ```mousePointMover```, s katerim 
 upravljamo prijem točke ob pritisku ```grabPoint```, kako to točko premaknemo ```movePoint``` in kako izpustimo ```dropPoint```.
 ```
 class mousePointMover:
@@ -204,7 +213,7 @@ class mousePointMover:
         self.grabbedPoint = None
         self.isHolding = False
 ```
-Za premikanje in povečavo kamere ne uporabimo objekta, saj kadar premikamo kamero, v resnici premikamo vse drugo v nasprotno smer, za kar ne potrebujemo objekta, potrebujemo pa fukncije ```moveCamera, zoomIn, zoomOut```.
+Za premikanje in povečavo kamere ne uporabimo objekta, saj kadar premikamo kamero, v resnici premikamo vse ostalo v nasprotno smer, za kar ne potrebujemo objekta, potrebujemo pa fukncije ```moveCamera, zoomIn, zoomOut```.
 
 ```
 #move camera
