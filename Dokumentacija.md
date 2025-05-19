@@ -3,7 +3,7 @@ Bezierova krivulja je "gladka" krivulja, ki se pogosto uporablja v računalnišk
 
 [Bézier curve](https://en.wikipedia.org/wiki/B%C3%A9zier_curve)
 
-![<Gif bezierove krivulje>](https://en.wikipedia.org/wiki/B%C3%A9zier_curve#/media/File:B%C3%A9zier_2_big.gif)
+![<Gif bezierove krivulje>](Extra/Bézier_2_big.gif)
 
 Glavni princip bezierove krivulje je to, da preko linearne interpolacije med dvema točkama dobimo novo točko, s katero nadaljujemo verigo interpolacij dokler ne dobimo končne točke.
 #### Programski jezik in knjižnice
