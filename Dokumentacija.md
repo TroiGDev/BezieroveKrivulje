@@ -23,7 +23,7 @@ import os
 import math
 ```
 ### Koda
-Najprej inicializiramo Pygame okno z širino ```screenWidth``` in višino ```screenHeight```.
+Najprej inicializiramo Pygame okno s širino ```screenWidth``` in višino ```screenHeight```.
 ```py
 pygame.init()
 screenWidth = 1000
@@ -31,7 +31,7 @@ screenHeight = 500
 screen = pygame.display.set_mode((screenWidth, screenHeight))
 pygame.display.set_caption('Krivulje')
 ```
-Nato v globalnem obsegu inicializiramo vse barve, za katere uporabimo RGB format.
+Nato v globalnem obsegu inicializiramo vse barve, za katere uporabimo 24 bitni (0-255) RGB format.
 ```py
 c_end = (255, 0, 0)
 c_end_sdw = (150, 0, 0)
@@ -41,10 +41,10 @@ c_curveLine = (255, 255 ,255)
 c_line = (150, 150, 150)
 c_floor_sdw = (0, 0, 0)
 ```
-#### - Objekti
-Nadaljujemo z definiranjem glavnih razredeov, kot so točka in kvadratna ter kubična krivulja.
+#### Razredi in objekti
+Nadaljujemo z definiranjem glavnih razredeov, kot so konstruktorska točka in kvadratna ter kubična krivulja.
 
-Preprosta točka ima pozicijo v ravnini ```x, y```, širino narisanega kroga ```pointWidth```, barvo narisanega kroga ```color``` in barvo sence narisanega kroga ```sdw_color```.
+Preprosta konstruktorska točka ima pozicijo v ravnini ```x, y```, širino narisanega kroga ```pointWidth```, barvo narisanega kroga ```color``` in barvo sence narisanega kroga ```sdw_color```.
 Za lažje sklicevanje je vsaki točki določena tudi starševska krivulja ```parentCurve```.
 ```py
 class point:
@@ -72,9 +72,14 @@ Točko narišemo tako, da narišemo vsak sloj ločeno, zato definiramo fuknciji 
 ```
 Bolj kompleksni strukturi pa sta kvadratna krivulja ```curve2``` in kubična krivulja ```curve3```, ki ju definiramo ločeno, čeprav med njima ni velike razlike.
 
-Vsaki krivulji določimo širino črte ```lineWidth```, seznam točk ```points```, ki sestavljajo krivuljo, konstruktorske točke (konec krivulje ```end1```, omejitvene točke ```anchor1, anchor2```, ter drugi konec krivulje ```end2```)
+Vsaki krivulji določimo konstruktorske točke (konec krivulje ```end1```, omejitvene točke ```anchor1, anchor2```, ter drugi konec krivulje ```end2```)
+in dva seznama ```bezierPointsX, bezierPointsY```, kjer i-ti element vsakega seznama predstavlja koordinati i-te točke.
+Tukaj poudarjam, da je razlikovanje med konstruktorsko točko in točko, s katero narišemo krivuljo, pomembno za razumevanje naslednje razalge.
 
-Tukaj je potrebno omeniti način risanja krivulj. Vsaka krivulja je sestavljena iz ravnih črt med dvema sosednjima točkama, število teh točk predstavlja natančnost prikaza krivulje ```curveAccuracy```.
+Potrebno je omeniti tudi način risanja krivulj. Vsaka krivulja je sestavljena iz ravnih črt med dvema sosednjima točkama, število teh točk predstavlja natančnost prikaza krivulje ```curveAccuracy```.
+
+Za vizualne lastnosti vsaki krivulji določimo tudi širino črt ```lineWidth```.
+
 ```py
 class curve2:
     def __init__(self, x, y, end1X, end1Y, anchor1X, anchor1Y, end2X, end2Y, lineWidth):
@@ -108,8 +113,6 @@ class curve2:
         self.points.append(self.anchor2)
         self.anchor2.parentCurve = self
 ```
-
-Mogoče ste opazili tudi pythonovo funkcijo ```append```, katero uporabimo za pripenjanje objekta v seznam, iz katerega sklicujemo funkcije vsakega elementa v zanki.
 
 Ko inicializiramo krivulje pa se inicializirajo tudi vse njene točke.
 ```py
@@ -271,7 +274,7 @@ def zoomOut(zoomSpeed):
             point.y = mY + vY * (1-zoomSpeed)
 ```
 
-#### - While loop
+#### While loop
 
 Glavna zanka ```while``` je zanka, ki omogoča da program teče dokler ga ne ustavimo. V njej se izvede vse kar se tiče uporabnikovega vnosa, posodobitve objektov in risanja na zaslon.
 
