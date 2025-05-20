@@ -5,6 +5,8 @@ Bezierova krivulja je "gladka" krivulja, ki se pogosto uporablja v računalnišk
 
 ![<Gif bezierove krivulje>](Extra/Bézier_2_big.gif)
 
+![<Gif bezierove krivulje>](Extra/Bézier_4_big.gif)
+
 Glavni princip bezierove krivulje je to, da preko linearne interpolacije med dvema točkama dobimo novo točko, s katero nadaljujemo verigo interpolacij dokler ne dobimo končne točke.
 #### Programski jezik in knjižnice
 Za mojo implementacijo sem uporabil programski jezik Python in grafični prikazovalnik Pygame. Za dodatno zmogljivost in funkcije pa sem uporabil ```math``` in ```sys``` ter ```os``` za shranjevanje podatkov.
