@@ -24,6 +24,7 @@ To je primer bezierove krivulje četrte stopnje:
 - [Dodatno](#Dodatno)
 - [Premikanje točk z miško](#Premikanje-točk-z-miško)
 - [Kamera, premikanje in povečava](#Kamera,-premikanje-in-povečava)
+- [Obstojnost podatkov v datotekah](#Obstojnost-podatkov-v-datotekah)
 - [While zanka](#While-zanka)
 - [Uporabnikov vnos](#Uporabnikov-vnos)
 - [Risanje](#Risanje)
@@ -145,6 +146,13 @@ Ko premikamo konstruktorske točke krivulje, moramo tudi posodobiti pozicijo vse
         for i in range(self.curveAccuracy):
             self.bezierPointsX[i], self.bezierPointsY[i] = self.getBezierPoint2(i/self.curveAccuracy, self.end1.x, self.end1.y, self.anchor1.x, self.anchor1.y, self.end2.x, self.end2.y)
 ```
+Za posodabljanje vseh krivulj, kadar uporabnik nekaj spremeni npr. premakne kamero ali poveča, uporabimo funkcijo ```updateAllCurvePointsOnAction```.
+```py
+def updateAllCurvePointsOnAction():
+    for curve in curves:
+        curve.updateCurvePoints()
+```
+        
 Za izračun nove pozicije točke pa uporabimo funkciji ```getBezierPoint2``` in ```getBezierPoint3``` (getBezierPoint2 za kvadratne krivulje in getBezierPoint3 za kubične krivulje).
 ```py
     def getBezierPoint2(self, t, end1X, end1Y, anc1X, anc1Y, end2X, end2Y):
@@ -295,6 +303,85 @@ def zoomOut(zoomSpeed):
             #set new x and y to vector * 1+zoomspeed
             point.x = mX + vX * (1-zoomSpeed)
             point.y = mY + vY * (1-zoomSpeed)
+```
+
+##### Obstojnost podatkov v datotekah
+
+Shranjevanje podatkov v podatkovno bazo kot npr. v ```.txt``` datoteko je sestavljeno iz 2 glavnih funkcij, shranjevanje v datoteko in nalaganje iz datoteke.
+
+Ampak najprej potrebujemo način sklicevanja datoteke, s katere želimo nalagati/na katero želimo shranjevati. Za to uporabimo ```InputField```(dodatni objekt, o keterem nisem napisal dokumentacije, ker je nekoliko nepotreben), vnosno polje v katerega uporabnik vpiše ime datoteke.
+
+```py
+#load from file on open
+inputField = TextInputField(5, 105, 300, 40)
+fileName = ""
+hasFileName = False
+```
+
+Ko uporabnik vpiže ime datoteke, program iz nje naloži podatke in iz njih ustvari "nove" krivulje - uporabimo funkcijo ```loadFromFile```.
+
+Tukaj je primer formata, ki ga uporabimo za shranjevanje in nalaganje krivulj. Vsaka vrstica predstavja eno krivuljo. Prva števka (vedno ```2``` ali ```3```) predstavlja stopnjo krivulje (kvadratna ali kubična), 
+vsaki 2 naslednji števili pa ponazarjata ```x``` in ```y``` koordinati konstruktivne točke. Prvi par števil za ```end1```, naslednji par za ```anc1``` (v kubični krivulji 2 para za ```anc1``` in ```anc2```) in zadnji par za ```end2```.
+```
+2 430 423 434 367 449 361
+3 440 335 490 257 447 194 506 121
+```
+
+```py
+def loadFromFile(fileName):
+
+    with open(fileName, 'r') as file:
+        content = file.readlines()
+
+        #divide data and use it to initialize new curves
+        for line in content:
+            #remove newlines
+            line = line.replace("\n", "")
+            print(line)
+
+            #seperate line by spaces, format
+            data = line.split(" ")
+            cPower = int(data[0])
+
+            #continue by format depeding on power
+            if cPower == 2:
+                end1X = int(data[1])
+                end1Y = int(data[2])
+                anchor1X = int(data[3])
+                anchor1Y = int(data[4])
+                end2X = int(data[5])
+                end2Y = int(data[6])
+
+                curve = curve2(0, 0, end1X, end1Y, anchor1X, anchor1Y, end2X, end2Y, cPower)
+
+            elif cPower == 3:
+                end1X = int(data[1])
+                end1Y = int(data[2])
+                anchor1X = int(data[3])
+                anchor1Y = int(data[4])
+                anchor2X = int(data[5])
+                anchor2Y = int(data[6])
+                end2X = int(data[7])
+                end2Y = int(data[8])
+
+                curve = curve3(0, 0, end1X, end1Y, anchor1X, anchor1Y, anchor2X, anchor2Y, end2X, end2Y, cPower)
+```
+
+Trenutno stanje krivulj pa se shrani na 2 načina, avtomatsko po vsake nekaj sekund, ali ročno (ob pritisku na tipko "e") - uporabimo funkcijo ```saveToFile```.
+
+```py
+def saveToFile(fileName):
+    with open(fileName, 'w') as file:
+        #for each curve
+        for curve in curves:
+            #write curves info to file line
+            if curve.power == 2:
+                string = str(round(curve.power)) + " " + str(round(curve.end1.x)) + " " + str(round(curve.end1.y)) + " " + str(round(curve.anchor1.x)) + " " + str(round(curve.anchor1.y)) + " " + str(round(curve.end2.x)) + " " + str(round(curve.end2.y))
+                file.write(string + "\n")
+            
+            if curve.power == 3:
+                string = str(round(curve.power)) + " " + str(round(curve.end1.x)) + " " + str(round(curve.end1.y)) + " " + str(round(curve.anchor1.x)) + " " + str(round(curve.anchor1.y)) + " " + str(round(curve.anchor2.x)) + " " + str(round(curve.anchor2.y)) + " " + str(round(curve.end2.x)) + " " + str(round(curve.end2.y))
+                file.write(string + "\n")
 ```
 
 #### While zanka
