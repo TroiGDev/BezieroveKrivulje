@@ -17,7 +17,7 @@ NAVODILA ZA UPORABO APLIKACIJE:
 
 -  Ko bo program odprt lahko pričnete z novo datoteko in risanjem Bezierovih krivulj
 
-Oglejte si tudi kakšne pripravljene primere v "Examples"
+Oglejte si tudi kakšne pripravljene primere v [Examples](./Examples)
 
 V prihodnosti bom najverjetneje dodal tudi:
 - Uporaba JSON namesto txt formata za shranjevanje podatkov slik
