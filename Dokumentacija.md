@@ -19,7 +19,7 @@ To je primer bezierove krivulje četrte stopnje:
 - [Koda](#Koda)
 - [Inicializacija okna](#Inicializacija-okna)
 - [Razredi in objekti](#Razredi-in-objekti)
-- [Točka](#Točka)
+- [Konstruktorska Točka](#Konstruktorska-točka)
 - [Krivulja](#Krivulja)
 - [Dodatno](#Dodatno)
 - [Premikanje točk z miško](#Premikanje-točk-z-miško)
@@ -48,7 +48,7 @@ screenHeight = 500
 screen = pygame.display.set_mode((screenWidth, screenHeight))
 pygame.display.set_caption('Krivulje')
 ```
-Nato v globalnem obsegu inicializiramo vse barve, za katere uporabimo 24 bitni (0-255) RGB format.
+Nato v globalnem obsegu inicializiramo vse barve, za katere uporabimo 0-255 RGB format.
 ```py
 c_end = (255, 0, 0)
 c_end_sdw = (150, 0, 0)
@@ -61,7 +61,7 @@ c_floor_sdw = (0, 0, 0)
 #### Razredi in objekti
 Nadaljujemo z definiranjem glavnih razredeov, kot so konstruktorska točka in kvadratna ter kubična krivulja.
 
-##### Točka
+##### Konstruktorska točka
 Preprosta konstruktorska točka ima pozicijo v ravnini ```x, y```, širino narisanega kroga ```pointWidth```, barvo narisanega kroga ```color``` in barvo sence narisanega kroga ```sdw_color```.
 Za lažje sklicevanje je vsaki točki določena tudi starševska krivulja ```parentCurve```.
 ```py
@@ -77,7 +77,7 @@ class point:
 
         self.parentCurve = None
 ```
-Točko narišemo tako, da narišemo vsak sloj ločeno, zato definiramo fuknciji ```draw``` in ```draw_sdw``` (risanje sence).
+Točko narišemo tako, da narišemo vsak sloj ločeno, zato definiramo funkciji ```draw``` in ```draw_sdw``` (risanje sence).
 ```py
     def draw(self):
         #draw point circle
@@ -94,7 +94,7 @@ Bolj kompleksni strukturi pa sta kvadratna krivulja ```curve2``` in kubična kri
 
 Vsaki krivulji določimo konstruktorske točke (konec krivulje ```end1```, omejitvene točke ```anchor1, anchor2```, ter drugi konec krivulje ```end2```)
 in dva seznama ```bezierPointsX, bezierPointsY```, kjer i-ti element vsakega seznama predstavlja koordinati i-te točke.
-Tukaj poudarjam, da je razlikovanje med konstruktorsko točko in točko, s katero narišemo krivuljo, pomembno za razumevanje naslednje razalge.
+Tukaj poudarjam, da je razlikovanje med konstruktorsko točko in točko, s katero narišemo krivuljo, pomembno za razumevanje razlage in programa.
 
 Potrebno je omeniti tudi način risanja krivulj. Vsaka krivulja je sestavljena iz ravnih črt med dvema sosednjima točkama, število teh točk predstavlja natančnost prikaza krivulje ```curveAccuracy```.
 
@@ -249,7 +249,7 @@ class mousePointMover:
         self.isHolding = False
 ```
 ##### Kamera, premikanje in povečava
-Za premikanje in povečavo kamere ne uporabimo objekta, saj kadar premikamo kamero, v resnici premikamo vse ostalo v nasprotno smer, za kar ne potrebujemo objekta, potrebujemo pa fukncije ```moveCamera, zoomIn, zoomOut```.
+Za premikanje in povečavo kamere ne uporabimo objekta, saj kadar premikamo kamero v resnici premikamo vse ostalo v nasprotno smer, potrebujemo pa fukncije ```moveCamera, zoomIn, zoomOut```.
 
 ```py
 #move camera
