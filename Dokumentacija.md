@@ -14,7 +14,23 @@ To je primer bezierove krivulje četrte stopnje:
 
 ![<Gif bezierove krivulje>](Extra/Bézier_4_big.gif)
 
-#### Programski jezik in knjižnice
+### Kazalo
+- [Programski jezik in knjižnice](#Programski-jezik-in-knjižnice)
+- [Koda](#Koda)
+  - [Inicializacija okna](#Inicializacija-okna)
+  - [Razredi in objekti](#Razredi-in-objekti)
+    - [Točka](#Točka)
+    - [Krivulja](#Krivulja)
+  - [Dodatno](#Dodatno)
+    - [Premikanje točk z miško](#Premikanje-točk-z-miško)
+    - [Kamera, premikanje in povečava](#Kamera,-premikanje-in-povečava)
+  - [While zanka](#While-zanka)
+    - [Uporabnikov vnos](#Uporabnikov-vnos)
+    - [Risanje](#Risanje)
+    - [Brisanje](#Brisanje)
+- [Zaključek](#Zaključek)
+
+### Programski jezik in knjižnice
 Za mojo implementacijo sem uporabil programski jezik Python in grafični prikazovalnik Pygame. Za dodatno zmogljivost in funkcije pa sem uporabil ```math``` in ```sys``` ter ```os``` za shranjevanje podatkov.
 ```py
 import pygame
@@ -23,6 +39,7 @@ import os
 import math
 ```
 ### Koda
+#### Inicializacija okna
 Najprej inicializiramo Pygame okno s širino ```screenWidth``` in višino ```screenHeight```.
 ```py
 pygame.init()
@@ -44,6 +61,7 @@ c_floor_sdw = (0, 0, 0)
 #### Razredi in objekti
 Nadaljujemo z definiranjem glavnih razredeov, kot so konstruktorska točka in kvadratna ter kubična krivulja.
 
+##### Točka
 Preprosta konstruktorska točka ima pozicijo v ravnini ```x, y```, širino narisanega kroga ```pointWidth```, barvo narisanega kroga ```color``` in barvo sence narisanega kroga ```sdw_color```.
 Za lažje sklicevanje je vsaki točki določena tudi starševska krivulja ```parentCurve```.
 ```py
@@ -70,6 +88,8 @@ Točko narišemo tako, da narišemo vsak sloj ločeno, zato definiramo fuknciji 
         #draw floor shadow
         pygame.draw.circle(screen, c_floor_sdw, (self.x, self.y + floorHeight), self.pointWidth)
 ```
+
+##### Krivulja
 Bolj kompleksni strukturi pa sta kvadratna krivulja ```curve2``` in kubična krivulja ```curve3```, ki ju definiramo ločeno, čeprav med njima ni velike razlike.
 
 Vsaki krivulji določimo konstruktorske točke (konec krivulje ```end1```, omejitvene točke ```anchor1, anchor2```, ter drugi konec krivulje ```end2```)
@@ -174,7 +194,9 @@ Tako kot pri točkah, moramo črte in sence vsake krivulje narisati po slojih.
         pygame.draw.line(screen, c_floor_sdw, (self.anchor2.x, self.anchor2.y + floorHeight), (self.end2.x, self.end2.y + floorHeight), self.lineWidth)
 ```
 
-#### dodatno: premikanje točk, kamera
+#### Dodatno
+
+##### Premikanje točk z miško
 Za glavni vnos (premikanje konstruktorskih točk krivulj z miško) uporabimo objekt ```mousePointMover```, s katerim 
 upravljamo prijem točke ob pritisku ```grabPoint```, kako to točko premaknemo ```movePoint``` in kako izpustimo ```dropPoint```.
 ```py
@@ -226,6 +248,7 @@ class mousePointMover:
         self.grabbedPoint = None
         self.isHolding = False
 ```
+##### Kamera, premikanje in povečava
 Za premikanje in povečavo kamere ne uporabimo objekta, saj kadar premikamo kamero, v resnici premikamo vse ostalo v nasprotno smer, za kar ne potrebujemo objekta, potrebujemo pa fukncije ```moveCamera, zoomIn, zoomOut```.
 
 ```py
@@ -274,12 +297,13 @@ def zoomOut(zoomSpeed):
             point.y = mY + vY * (1-zoomSpeed)
 ```
 
-#### While loop
+#### While zanka
 
 Glavna zanka ```while``` je zanka, ki omogoča da program teče dokler ga ne ustavimo. V njej se izvede vse kar se tiče uporabnikovega vnosa, posodobitve objektov in risanja na zaslon.
 
 V zanki je zaporedje izvedbe operacij zelo pomembno. Na začetku je vnos, v katerem se izvede tudi posodobitev in šele nato risanje.
 
+##### Uporabnikov vnos
 Možnosti vnosa so razdeljene na 2 glavni skupini, vnos, ki se zgodi prvi "frame" po tem ko je tipka pritisnjena in vnos, ki se zgodi vsak "frame" kadar je tipka pritisnjena.
 
 ```py
@@ -396,6 +420,7 @@ while True:
         zoomOut(zoomSpeed * deltaTime)
         updateAllCurvePointsOnAction()  #update all curve points due to change
 ```
+##### Risanje
 
 Nazadnje pa še risanje, kjer se v zaporedju rišejo sloji.
 ```py
@@ -427,6 +452,8 @@ Nazadnje pa še risanje, kjer se v zaporedju rišejo sloji.
         #draw controls and credits
         drawControls()
 ```
+##### Brisanje
+
 Dodatno pa se upravlja tudi odstranjevanje objektov, kjer objekt dodamo v novi seznam za naslednji "frame", če ta objekt ni bil izbirsan trenutni "frame".
 ```py
         #remove any deleted curves and their points
