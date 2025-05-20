@@ -3,11 +3,17 @@ Bezierova krivulja je "gladka" krivulja, ki se pogosto uporablja v računalnišk
 
 [Bézier curve](https://en.wikipedia.org/wiki/B%C3%A9zier_curve)
 
+Glavni princip funkcije bezierove krivulje je to, da preko linearne interpolacije med dvema točkama dobimo novo točko, s katero nadaljujemo verigo interpolacij dokler ne dobimo končne točke.
+
+Tukaj je primer bezierove krivulje, kjer so definirano konstruktorske točke ```p0, p1, p2``` (v moji implementaciji ```p0 = end1, p1 = anc1, p2 = end2```).
+Kot parameter ,ki razlikuje dve poljubni točki v določeni krivulji, pa je definiran tudi variabilen ```t``` - realna vrednost med 0 in 1.
+
 ![<Gif bezierove krivulje>](Extra/Bézier_2_big.gif)
+
+To je primer bezierove krivulje četrte stopnje:
 
 ![<Gif bezierove krivulje>](Extra/Bézier_4_big.gif)
 
-Glavni princip bezierove krivulje je to, da preko linearne interpolacije med dvema točkama dobimo novo točko, s katero nadaljujemo verigo interpolacij dokler ne dobimo končne točke.
 #### Programski jezik in knjižnice
 Za mojo implementacijo sem uporabil programski jezik Python in grafični prikazovalnik Pygame. Za dodatno zmogljivost in funkcije pa sem uporabil ```math``` in ```sys``` ter ```os``` za shranjevanje podatkov.
 ```py
@@ -39,7 +45,7 @@ c_floor_sdw = (0, 0, 0)
 Nadaljujemo z definiranjem glavnih razredeov, kot so točka in kvadratna ter kubična krivulja.
 
 Preprosta točka ima pozicijo v ravnini ```x, y```, širino narisanega kroga ```pointWidth```, barvo narisanega kroga ```color``` in barvo sence narisanega kroga ```sdw_color```.
-Za lažje sklicevanje je vsaki točki določena tudi starševska krivulja.
+Za lažje sklicevanje je vsaki točki določena tudi starševska krivulja ```parentCurve```.
 ```py
 class point:
     def __init__(self, x, y, pointWidth, color, sdw_color):
