@@ -23,7 +23,7 @@ To je primer bezierove krivulje četrte stopnje:
 - [Krivulja](#Krivulja)
 - [Dodatno](#Dodatno)
 - [Premikanje točk z miško](#Premikanje-točk-z-miško)
-- [Kamera, premikanje in povečava](#Kamera,-premikanje-in-povečava)
+- [Kamera, premikanje in povečava](#Kamera-premikanje-in-povečava)
 - [Obstojnost podatkov v datotekah](#Obstojnost-podatkov-v-datotekah)
 - [While zanka](#While-zanka)
 - [Uporabnikov vnos](#Uporabnikov-vnos)
@@ -256,7 +256,7 @@ class mousePointMover:
         self.grabbedPoint = None
         self.isHolding = False
 ```
-##### Kamera, premikanje in povečava
+##### Kamera premikanje in povečava
 Za premikanje in povečavo kamere ne uporabimo objekta, saj kadar premikamo kamero v resnici premikamo vse ostalo v nasprotno smer, potrebujemo pa fukncije ```moveCamera, zoomIn, zoomOut```.
 
 ```py
@@ -559,7 +559,7 @@ Dodatno pa se upravlja tudi odstranjevanje objektov, kjer objekt dodamo v novi s
 ```
 
 ### Zaključek
-Trenutna dokumentacija ne obsega vsega, saj preskoči shranjevanje podatkov, vodilno besedilo za kontrole in manjše detajle.
+Trenutna dokumentacija ne obsega vsega, saj preskoči vodilno besedilo za kontrole in manjše detajle.
 
 Napisana je v obliki predstavitve in ne realistične dokumentacije, ki bi jo nekdo morda hotel uporabiti za modifikacijo in gradnjo lastne verzije.
 
